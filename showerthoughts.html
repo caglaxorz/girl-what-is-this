@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShowerOS // Thought Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #bc13fe;
+            --tile-dark: #0a0a12;
+            --tile-light: #11111a;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --steam-color: rgba(200, 230, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: var(--tile-dark);
+            /* Retro-Futuristic Tiled Wall Pattern */
+            background-image: 
+                linear-gradient(30deg, #000000 12%, transparent 12.5%, transparent 87%, #000000 87.5%, #000000),
+                linear-gradient(150deg, #000000 12%, transparent 12.5%, transparent 87%, #000000 87.5%, #000000),
+                linear-gradient(30deg, #000000 12%, transparent 12.5%, transparent 87%, #000000 87.5%, #000000),
+                linear-gradient(150deg, #000000 12%, transparent 12.5%, transparent 87%, #000000 87.5%, #000000),
+                linear-gradient(60deg, #111 25%, transparent 25.5%, transparent 75%, #111 75%, #111),
+                linear-gradient(60deg, #111 25%, transparent 25.5%, transparent 75%, #111 75%, #111);
+            background-size: 80px 140px;
+            background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--neon-blue);
+        }
+
+        /* --- CONDENSATION / STEAM OVERLAY --- */
+        .steam-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.8) 100%);
+            backdrop-filter: blur(3px);
+            pointer-events: none;
+            z-index: 1;
+            animation: steamPulse 10s infinite alternate;
+        }
+
+        .water-drops {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSIyIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L3N2Zz4=');
+            opacity: 0.3;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        @keyframes steamPulse {
+            0% { backdrop-filter: blur(2px); }
+            100% { backdrop-filter: blur(5px); }
+        }
+
+        /* --- MAIN INTERFACE --- */
+        .interface-container {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 700px;
+            min-height: 400px;
+            background: rgba(10, 15, 30, 0.6);
+            border: 1px solid var(--neon-blue);
+            box-shadow: 
+                0 0 20px rgba(0, 243, 255, 0.2),
+                inset 0 0 30px rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Holographic Scanlines */
+        .interface-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 243, 255, 0.03) 50%, transparent 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            border-radius: 20px;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: rgba(0, 243, 255, 0.7);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .temp-gauge {
+            color: var(--neon-pink);
+            font-weight: bold;
+        }
+
+        /* --- THE THOUGHT DISPLAY --- */
+        .thought-display {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.8rem;
+            line-height: 1.4;
+            font-weight: 500;
+            text-shadow: 0 0 10px var(--neon-blue);
+            min-height: 200px;
+            padding: 20px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+
+        .thought-display.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- CONTROLS --- */
+        .control-panel {
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-next {
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            padding: 15px 40px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+        }
+
+        .btn-next:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.6);
+        }
+
+        .btn-next:active {
+            transform: scale(0.98);
+        }
+
+        /* Loading bar animation */
+        .loader {
+            height: 2px;
+            width: 0%;
+            background: var(--neon-pink);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: width 0.1s;
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        /* --- DECORATIVE ELEMENTS --- */
+        .corner-decor {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--neon-blue);
+            transition: all 0.3s;
+        }
+        .tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        .source-tag {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<!-- Menu Bar - Include this in all subpages -->
+<style>
+  .menu-bar-container {
+    position: fixed;
+    top: 6px;
+    right: 6px;
+    z-index: 10000;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive;
+    color: #4a0072; /* dark purple */
+  }
+
+  .menu-button {
+    background-color: #fff;
+    border: 2px solid #4a0072;
+    box-shadow: 4px 4px 0px 0px rgba(74, 0, 114, 0.15);
+    padding: 8px 16px;
+    font-weight: bold;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 0;
+    color: #4a0072;
+  }
+
+  .menu-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 6px 0px 0px rgba(74, 0, 114, 0.18);
+  }
+
+  .menu-button:active {
+    background-color: #f7e6fb;
+    transform: translateY(1px);
+    box-shadow: 2px 2px 0px 0px rgba(74, 0, 114, 0.12);
+  }
+
+  .menu-dropdown {
+    position: absolute;
+    top: 56px;
+    right: 0;
+    width: 280px;
+    background-color: #fff4fb;
+    border: 3px double #f0e6ff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    padding: 12px;
+    max-height: 72vh;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .menu-dropdown.open {
+    display: block;
+  }
+
+  .menu-title {
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 2px dashed #e6d0f0;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    color: #4a0072;
+  }
+
+  .menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .menu-item {
+    display: block;
+  }
+
+  .menu-link {
+    display: block;
+    padding: 6px 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    color: #4a0072;
+    transition: all 0.12s;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive;
+  }
+
+  .menu-link:hover {
+    background-color: #fff;
+    border: 1px solid #f0c6eb;
+  }
+
+  .menu-emoji {
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  .menu-title-text {
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: #4a0072;
+  }
+
+  /* Scrollbar styling */
+  .menu-dropdown::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .menu-dropdown::-webkit-scrollbar-track {
+    background: #fff4fb;
+  }
+
+  .menu-dropdown::-webkit-scrollbar-thumb {
+    background: #d8a3e0;
+    border-radius: 4px;
+  }
+
+  .menu-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #c985d6;
+  }
+</style>
+
+<div class="menu-bar-container">
+  <button class="menu-button" id="menuToggle">MENU ☰</button>
+  <div class="menu-dropdown" id="menuDropdown">
+    <div class="menu-title">i made these!!!</div>
+    <ul class="menu-list" id="menuList"></ul>
+  </div>
+</div>
+
+<script>
+  // Menu data — ensure URLs match current filenames in repo
+  const projects = [
+      { title: "Alien Sudoku", url: "/aliensudoku.html", emoji: "👽" },
+      { title: "Hayırlı Olsun Reaffirmer", url: "/hayirliolsun.html", emoji: "🧿" },
+      { title: "I'm Baby", url: "/imbaby.html", emoji: "🍼" },
+      { title: "Shower Thoughts", url: "/showerthoughts.html", emoji: "🛁" },
+      { title: "Which SP9K Girl Are You?", url: "/sp9k.html", emoji: "👧" },
+    { title: 'Husband Finder', url: '/husband-finder.html', emoji: '💍' },
+    { title: 'Hangi Manifest Kızısın?', url: '/hangimanifest.html', emoji: '🔮' },
+    { title: 'Particularly', url: '/particularly.html', emoji: '✨' },
+    { title: 'Page in a Page', url: '/page-in-page.html', emoji: '🕸️' },
+    { title: 'Which 2003 Lyric Are U?', url: '/2003lyrics.html', emoji: '🎤' },
+    { title: '✨Anket Defteri✨', url: '/anketdefteri.html', emoji: '📔' },
+    { title: 'Betrayal Calculator', url: '/oneofyou.html', emoji: '🐍' },
+    { title: 'What Color is the Flag?', url: '/redflag.html', emoji: '🚩' },
+    { title: 'ÇBS Simulator', url: '/thecrunch.html', emoji: '📈' },
+    { title: 'Anti-Productivity App', url: '/thevoid.html', emoji: '🕳️' },
+    { title: 'ÇBS Paint', url: '/mspaint.html', emoji: '🎨' },
+    { title: 'Catch the Frog', url: '/thefrog.html', emoji: '🐸' },
+    { title: 'Follow the White Rabbit', url: '/rabbit.html', emoji: '🐇' },
+    { title: 'The Prophecy', url: '/theorb.html', emoji: '🔮' },
+    { title: 'Scream into the Void', url: '/scream.html', emoji: '😱' },
+    { title: 'Ice Ice Baby', url: '/icecube.html', emoji: '🧊' },
+    { title: 'Excuse Generator', url: '/excusegen.html', emoji: '🤥' },
+    { title: 'The Sorting Ceremony', url: '/hogwarts.html', emoji: '🎩' },
+    { title: 'Past Life Registry', url: '/pastliferegistry.html', emoji: '📜' },
+    { title: 'Startup Generator', url: '/startupgen.html', emoji: '🚀' },
+    { title: 'Is It Tuesday?', url: '/tuesday.html', emoji: '📅' },
+
+  ];
+
+  const menuToggle = document.getElementById('menuToggle');
+  const menuDropdown = document.getElementById('menuDropdown');
+  const menuList = document.getElementById('menuList');
+
+  // Populate menu
+  projects.forEach(project => {
+    const li = document.createElement('li');
+    li.className = 'menu-item';
+    li.innerHTML = `
+      <a href="${project.url}" class="menu-link">
+        <span class="menu-emoji">${project.emoji}</span>
+        <span class="menu-title-text">${project.title}</span>
+      </a>
+    `;
+    menuList.appendChild(li);
+  });
+
+  // Toggle menu
+  menuToggle.addEventListener('click', () => {
+    menuDropdown.classList.toggle('open');
+    menuToggle.textContent = menuDropdown.classList.contains('open') ? 'CLOSE [X]' : 'MENU ☰';
+  });
+
+  // Close menu when clicking a link
+  document.querySelectorAll('.menu-link').forEach(link => {
+    link.addEventListener('click', () => {
+      menuDropdown.classList.remove('open');
+      menuToggle.textContent = 'MENU ☰';
+    });
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.menu-bar-container')) {
+      menuDropdown.classList.remove('open');
+      menuToggle.textContent = 'MENU ☰';
+    }
+  });
+</script>
+
+
+    <div class="steam-layer"></div>
+    <div class="water-drops"></div>
+
+    <div class="interface-container">
+        <!-- Decorative Corners -->
+        <div class="corner-decor tl"></div>
+        <div class="corner-decor tr"></div>
+        <div class="corner-decor bl"></div>
+        <div class="corner-decor br"></div>
+
+        <div class="header">
+            <div class="status">
+                <span>🚿 SHOWER_OS v2.0</span>
+            </div>
+            <div class="status">
+                <span>H2O TEMP:</span>
+                <span class="temp-gauge">42°C</span>
+            </div>
+        </div>
+
+        <div id="thought-box" class="thought-display">
+            INITIALIZING NEURAL LINK...
+        </div>
+        
+        <div class="source-tag">SOURCE: r/Showerthoughts DATABASE</div>
+
+        <div class="control-panel">
+            <button class="btn-next" onclick="generateThought()">
+                <div id="load-bar" class="loader"></div>
+                Cycle Water
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // A curated list of classic r/Showerthoughts
+        const thoughts = [
+            "Go to bed, you'll feel better in the morning is the human version of Did you turn it off and turn it back on again?",
+            "The sinking of the Titanic must have been a miracle to the lobsters in the ship's kitchen.",
+            "When you say 'Forward' or 'Back', your lips move in those directions.",
+            "If you replace 'W' with 'T' in 'What, Where and When', you get the answer to each of them.",
+            "The object of golf is to play the least amount of golf.",
+            "Maybe plants are really farming us, giving us oxygen until we eventually expire and turn into mulch which they can consume.",
+            "Lawyers hope you get sued, doctors hope you get sick, cops hope you're criminal, mechanics hope you have car trouble, but only a thief wishes you prosperity.",
+            "Tall people are expected to use their reach to help shorter people, but if a tall person were to ask a short person to hand them something they dropped on the floor it'd be insulting.",
+            "If I get up 10 minutes earlier than usual, I treat it like 2 extra hours and end up late for work.",
+            "Aliens probably ride past earth and lock their doors.",
+            "The person who would proofread Hitler's speeches was a grammar nazi.",
+            "When you drink alcohol you are just borrowing happiness from tomorrow.",
+            "Your stomach thinks all potato is mashed.",
+            "If you rip a hole in a net, there are fewer holes in it than there were before.",
+            "Tobacco companies kill their best customers and condom companies kill their future customers.",
+            "Assuming the Big Bang Theory is correct, the universe started with a loading screen of pure energy before matter rendered.",
+            "We pretend to work because they pretend to pay us.",
+            "Waterboarding at Guantanamo Bay sounds super rad if you don't know what either of those things are.",
+            "Telling someone to 'calm down' has literally never calmed anyone down in the history of humanity.",
+            "History classes are only going to get longer and harder as time goes on.",
+            "Security at every level of an airport is absolutely ridiculous until you get to the baggage claim. Then it’s just like 'Grab whatever bag looks like yours and leave.'",
+            "Only boring people get bored.",
+            "Sleep is a free trial of death.",
+            "Technically, you are always clapping. The time between claps just varies.",
+            "Biting your tongue while eating is a perfect example of how you can still screw up, even with decades of experience.",
+            "Theme parks can snap a crystal clear picture of you on a roller coaster at 70 mph, but bank cameras can't get a clear shot of a robber standing still.",
+            "Searching for a new laptop online basically forces your current computer to dig its own grave.",
+            "Night is just the shadow of the Earth."
+        ];
+
+        const display = document.getElementById('thought-box');
+        const loader = document.getElementById('load-bar');
+        let isGenerating = false;
+
+        function generateThought() {
+            if (isGenerating) return;
+            isGenerating = true;
+
+            // 1. Animate the loader
+            loader.style.width = "100%";
+            
+            // 2. Fade out old text
+            display.classList.remove('visible');
+
+            setTimeout(() => {
+                // 3. Pick random thought
+                const randomIndex = Math.floor(Math.random() * thoughts.length);
+                display.innerText = thoughts[randomIndex];
+                
+                // 4. Fade in new text
+                display.classList.add('visible');
+                
+                // 5. Reset loader
+                loader.style.width = "0%";
+                isGenerating = false;
+                
+                // 6. Glitch effect on the container border (visual feedback)
+                const container = document.querySelector('.interface-container');
+                container.style.borderColor = "var(--neon-pink)";
+                container.style.boxShadow = "0 0 30px rgba(188, 19, 254, 0.4)";
+                setTimeout(() => {
+                    container.style.borderColor = "var(--neon-blue)";
+                    container.style.boxShadow = "0 0 20px rgba(0, 243, 255, 0.2)";
+                }, 200);
+
+            }, 500);
+        }
+
+        // Init first thought
+        window.onload = () => {
+            setTimeout(generateThought, 500);
+        };
+
+    </script>
+</body>
+</html>

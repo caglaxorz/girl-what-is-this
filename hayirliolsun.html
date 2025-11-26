@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hayırlı Olsun Mu?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --nazar-blue: #0044cc;
+            --nazar-light: #88ccff;
+            --bg-color: #f0f8ff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            /* Nazar Boncuğu Pattern using SVG Data URI */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40' fill='%23003399'/%3E%3Ccircle cx='50' cy='50' r='28' fill='white'/%3E%3Ccircle cx='50' cy='50' r='18' fill='%2366ccff'/%3E%3Ccircle cx='50' cy='50' r='8' fill='black'/%3E%3C/svg%3E");
+            background-size: 80px 80px;
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+        }
+
+        /* Overlay to dim background slightly so text pops */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            z-index: 1;
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: clamp(3rem, 10vw, 6rem);
+            color: var(--nazar-blue);
+            margin: 0 0 30px 0;
+            text-shadow: 4px 4px 0px #88ccff;
+            line-height: 1.2;
+        }
+
+        button {
+            background-color: var(--nazar-blue);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 2rem;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #002266, 0 15px 20px rgba(0,0,0,0.2);
+            transition: transform 0.1s, box-shadow 0.1s;
+            outline: none;
+        }
+
+        button:active {
+            transform: translateY(10px);
+            box-shadow: 0 0 0 #002266, 0 0 0 rgba(0,0,0,0);
+        }
+
+        button:hover {
+            background-color: #0055ff;
+        }
+
+        /* The Nazar Emoji Decoration */
+        .big-nazar {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: spin 10s linear infinite;
+        }
+
+        /* Fireworks Canvas */
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5; /* Behind content, above overlay? No, let's put it on top of everything for maximum celebration */
+            z-index: 20; 
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .success-msg {
+            display: none;
+            font-size: 2rem;
+            color: #003399;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+<!-- Menu Bar - Include this in all subpages -->
+<style>
+  .menu-bar-container {
+    position: fixed;
+    top: 6px;
+    right: 6px;
+    z-index: 10000;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive;
+    color: #4a0072; /* dark purple */
+  }
+
+  .menu-button {
+    background-color: #fff;
+    border: 2px solid #4a0072;
+    box-shadow: 4px 4px 0px 0px rgba(74, 0, 114, 0.15);
+    padding: 8px 16px;
+    font-weight: bold;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 0;
+    color: #4a0072;
+  }
+
+  .menu-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 6px 0px 0px rgba(74, 0, 114, 0.18);
+  }
+
+  .menu-button:active {
+    background-color: #f7e6fb;
+    transform: translateY(1px);
+    box-shadow: 2px 2px 0px 0px rgba(74, 0, 114, 0.12);
+  }
+
+  .menu-dropdown {
+    position: absolute;
+    top: 56px;
+    right: 0;
+    width: 280px;
+    background-color: #fff4fb;
+    border: 3px double #f0e6ff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    padding: 12px;
+    max-height: 72vh;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .menu-dropdown.open {
+    display: block;
+  }
+
+  .menu-title {
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 2px dashed #e6d0f0;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    color: #4a0072;
+  }
+
+  .menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .menu-item {
+    display: block;
+  }
+
+  .menu-link {
+    display: block;
+    padding: 6px 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    color: #4a0072;
+    transition: all 0.12s;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive;
+  }
+
+  .menu-link:hover {
+    background-color: #fff;
+    border: 1px solid #f0c6eb;
+  }
+
+  .menu-emoji {
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  .menu-title-text {
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: #4a0072;
+  }
+
+  /* Scrollbar styling */
+  .menu-dropdown::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .menu-dropdown::-webkit-scrollbar-track {
+    background: #fff4fb;
+  }
+
+  .menu-dropdown::-webkit-scrollbar-thumb {
+    background: #d8a3e0;
+    border-radius: 4px;
+  }
+
+  .menu-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #c985d6;
+  }
+</style>
+
+<div class="menu-bar-container">
+  <button class="menu-button" id="menuToggle">MENU ☰</button>
+  <div class="menu-dropdown" id="menuDropdown">
+    <div class="menu-title">i made these!!!</div>
+    <ul class="menu-list" id="menuList"></ul>
+  </div>
+</div>
+
+<script>
+  // Menu data — ensure URLs match current filenames in repo
+  const projects = [
+      { title: "Alien Sudoku", url: "/aliensudoku.html", emoji: "👽" },
+      { title: "Hayırlı Olsun Reaffirmer", url: "/hayirliolsun.html", emoji: "🧿" },
+      { title: "I'm Baby", url: "/imbaby.html", emoji: "🍼" },
+      { title: "Shower Thoughts", url: "/showerthoughts.html", emoji: "🛁" },
+      { title: "Which SP9K Girl Are You?", url: "/sp9k.html", emoji: "👧" },
+    { title: 'Husband Finder', url: '/husband-finder.html', emoji: '💍' },
+    { title: 'Hangi Manifest Kızısın?', url: '/hangimanifest.html', emoji: '🔮' },
+    { title: 'Particularly', url: '/particularly.html', emoji: '✨' },
+    { title: 'Page in a Page', url: '/page-in-page.html', emoji: '🕸️' },
+    { title: 'Which 2003 Lyric Are U?', url: '/2003lyrics.html', emoji: '🎤' },
+    { title: '✨Anket Defteri✨', url: '/anketdefteri.html', emoji: '📔' },
+    { title: 'Betrayal Calculator', url: '/oneofyou.html', emoji: '🐍' },
+    { title: 'What Color is the Flag?', url: '/redflag.html', emoji: '🚩' },
+    { title: 'ÇBS Simulator', url: '/thecrunch.html', emoji: '📈' },
+    { title: 'Anti-Productivity App', url: '/thevoid.html', emoji: '🕳️' },
+    { title: 'ÇBS Paint', url: '/mspaint.html', emoji: '🎨' },
+    { title: 'Catch the Frog', url: '/thefrog.html', emoji: '🐸' },
+    { title: 'Follow the White Rabbit', url: '/rabbit.html', emoji: '🐇' },
+    { title: 'The Prophecy', url: '/theorb.html', emoji: '🔮' },
+    { title: 'Scream into the Void', url: '/scream.html', emoji: '😱' },
+    { title: 'Ice Ice Baby', url: '/icecube.html', emoji: '🧊' },
+    { title: 'Excuse Generator', url: '/excusegen.html', emoji: '🤥' },
+    { title: 'The Sorting Ceremony', url: '/hogwarts.html', emoji: '🎩' },
+    { title: 'Past Life Registry', url: '/pastliferegistry.html', emoji: '📜' },
+    { title: 'Startup Generator', url: '/startupgen.html', emoji: '🚀' },
+    { title: 'Is It Tuesday?', url: '/tuesday.html', emoji: '📅' },
+
+  ];
+
+  const menuToggle = document.getElementById('menuToggle');
+  const menuDropdown = document.getElementById('menuDropdown');
+  const menuList = document.getElementById('menuList');
+
+  // Populate menu
+  projects.forEach(project => {
+    const li = document.createElement('li');
+    li.className = 'menu-item';
+    li.innerHTML = `
+      <a href="${project.url}" class="menu-link">
+        <span class="menu-emoji">${project.emoji}</span>
+        <span class="menu-title-text">${project.title}</span>
+      </a>
+    `;
+    menuList.appendChild(li);
+  });
+
+  // Toggle menu
+  menuToggle.addEventListener('click', () => {
+    menuDropdown.classList.toggle('open');
+    menuToggle.textContent = menuDropdown.classList.contains('open') ? 'CLOSE [X]' : 'MENU ☰';
+  });
+
+  // Close menu when clicking a link
+  document.querySelectorAll('.menu-link').forEach(link => {
+    link.addEventListener('click', () => {
+      menuDropdown.classList.remove('open');
+      menuToggle.textContent = 'MENU ☰';
+    });
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.menu-bar-container')) {
+      menuDropdown.classList.remove('open');
+      menuToggle.textContent = 'MENU ☰';
+    }
+  });
+</script>
+
+
+    <div class="overlay"></div>
+    <canvas id="canvas"></canvas>
+
+    <div class="content">
+        <div class="big-nazar">🧿</div>
+        <h1>hayırlı olsun mu?</h1>
+        <button id="btn" onclick="celebrate()">olsun</button>
+        <div id="msg" class="success-msg">🧿 MAŞALLAH 🧿</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let fireworks = [];
+        let particles = [];
+        let animationId;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Firework {
+            constructor(x, targetY) {
+                this.x = x;
+                this.y = canvas.height;
+                this.targetY = targetY;
+                this.speed = 12;
+                this.angle = -Math.PI / 2;
+                this.hue = Math.random() * 360;
+                this.exploded = false;
+            }
+
+            update() {
+                this.y -= this.speed;
+                if (this.y <= this.targetY) {
+                    this.exploded = true;
+                    createParticles(this.x, this.y, this.hue);
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = `hsl(${this.hue}, 100%, 50%)`;
+                ctx.fill();
+            }
+        }
+
+        class Particle {
+            constructor(x, y, hue) {
+                this.x = x;
+                this.y = y;
+                this.hue = hue;
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 6 + 2;
+                this.vx = Math.cos(angle) * velocity;
+                this.vy = Math.sin(angle) * velocity;
+                this.friction = 0.95;
+                this.gravity = 0.15;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.015 + 0.01;
+            }
+
+            update() {
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = `hsl(${this.hue}, 100%, 60%)`;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createParticles(x, y, hue) {
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle(x, y, hue));
+            }
+        }
+
+        function loop() {
+            // Create trail effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; 
+            // Wait, we want transparent background for the canvas so we see the website
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Randomly add fireworks
+            if (Math.random() < 0.1) {
+                const x = Math.random() * canvas.width;
+                const targetY = Math.random() * (canvas.height / 2);
+                fireworks.push(new Firework(x, targetY));
+            }
+
+            // Update fireworks
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                fireworks[i].update();
+                fireworks[i].draw();
+                if (fireworks[i].exploded) {
+                    fireworks.splice(i, 1);
+                }
+            }
+
+            // Update particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            animationId = requestAnimationFrame(loop);
+        }
+
+        function celebrate() {
+            const btn = document.getElementById('btn');
+            const msg = document.getElementById('msg');
+            
+            // Change button text
+            btn.innerText = "OLDU BİLE";
+            btn.disabled = true;
+            btn.style.backgroundColor = "#28a745"; // Green for success
+            btn.style.boxShadow = "0 0 0";
+            btn.style.transform = "translateY(10px)";
+
+            // Show Maşallah
+            msg.style.display = "block";
+
+            // Start Fireworks
+            loop();
+
+            // Play sound logic (optional, kept visual only for simplicity)
+        }
+    </script>
+</body>
+</html>ha

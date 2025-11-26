@@ -2,6 +2,11 @@
 import { Project, Song, ChaosLinkItem } from './types';
 
 export const PROJECTS: Project[] = [
+    { id: '23', title: "Alien Sudoku", url: "/aliensudoku.html", emoji: "👽" },
+    { id: '24', title: "Hayırlı Olsun Reaffirmer", url: "/hayirliolsun.html", emoji: "🧿" },
+    { id: '25', title: "I'm Baby", url: "/imbaby.html", emoji: "🍼" },
+    { id: '26', title: "Shower Thoughts", url: "/showerthoughts.html", emoji: "🛁" },
+    { id: '27', title: "Which SP9K Girl Are You?", url: "/sp9k.html", emoji: "👧" },
   { id: '1', title: 'Husband Finder', url: '/husband-finder.html', emoji: '💍' },
   { id: '3', title: 'Particularly', url: '/particularly.html', emoji: '✨' },
   { id: '4', title: 'Hangi Manifest Kızısın?', url: '/hangimanifest.html', emoji: '🔮' },
