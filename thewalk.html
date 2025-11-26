@@ -1,0 +1,962 @@
+
+    <!-- Go Back Button - Include in all subpages -->
+    <style>
+    .go-back-container {
+      position: fixed;
+      top: 6px;
+      left: 6px;
+      z-index: 10001;
+      font-family: 'Comic Sans MS', 'Comic Neue', cursive;
+    }
+    .go-back-button {
+      background-color: #fff;
+      border: 2px solid #4a0072;
+      box-shadow: 4px 4px 0px 0px rgba(74, 0, 114, 0.15);
+      padding: 8px 16px;
+      font-weight: bold;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-radius: 0;
+      color: #4a0072;
+    }
+    .go-back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 4px 6px 0px 0px rgba(74, 0, 114, 0.18);
+    }
+    .go-back-button:active {
+      background-color: #f7e6fb;
+      transform: translateY(1px);
+      box-shadow: 2px 2px 0px 0px rgba(74, 0, 114, 0.12);
+    }
+    </style>
+    <div class="go-back-container">
+      <button class="go-back-button" onclick="window.location.href='/'">Go Back</button>
+    </div>
+import React, { useState, useEffect, useMemo } from 'react';
+import { ArrowRight, Trees, Skull, Heart, Zap, Sparkles, Moon, Sun } from 'lucide-react';
+
+// --- HELPERS ---
+const shuffle = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
+
+// --- CONTENT DATABASES ---
+
+// 1-4 (Intro Buffer)
+const INTRO_QUESTIONS = [
+  {
+    id: 1,
+    text: "We’ve been walking for twenty minutes. The trees look like they’re judging your posture.",
+    options: [
+      { text: "I straighten my back immediately.", type: 'delusion' },
+      { text: "I judge them back. They’re just wood.", type: 'grief' },
+      { text: "I wonder if they communicate via mycelial networks.", type: 'mushroom' },
+      { text: "I suggest we stop for a water break.", type: 'real' },
+    ]
+  },
+  {
+    id: 2,
+    text: "You find a rock that looks exactly like your childhood fears.",
+    options: [
+      { text: "I put it in my pocket. It's heavy.", type: 'grief' },
+      { text: "It actually looks like a heart if you squint.", type: 'delusion' },
+      { text: "I lick it. For science.", type: 'mushroom' },
+      { text: "It's just a rock, babe. Leave it.", type: 'real' },
+    ]
+  },
+  {
+    id: 3,
+    text: "If we were planets, what would our orbital resonance be?",
+    options: [
+      { text: "Perfectly synchronized, forever.", type: 'delusion' },
+      { text: "Decaying orbit. We crash in 4 billion years.", type: 'grief' },
+      { text: "We are actually the same planet in different timelines.", type: 'mushroom' },
+      { text: "Earth and Mars. Neighbors, but distinct.", type: 'real' },
+    ]
+  },
+  {
+    id: 4,
+    text: "A squirrel crosses our path. It knows something.",
+    options: [
+      { text: "It knows I’m pretending to be happy.", type: 'grief' },
+      { text: "It’s leading us to a secret garden.", type: 'delusion' },
+      { text: "It’s a machine elf in disguise.", type: 'mushroom' },
+      { text: "It’s looking for acorns. Relax.", type: 'real' },
+    ]
+  },
+];
+
+// 5-14 (User Provided Opening)
+const USER_OPENING = [
+  {
+    id: 5,
+    text: "The light through the leaves looks exactly like your grandmother’s kitchen ceiling.",
+    options: [
+      { text: "That was where I first learned how to mourn.", type: 'grief' },
+      { text: "It reminds me of Sundays. Warm and safe. Kind of like this walk.", type: 'real' },
+      { text: "Maybe memory is a light filter. Maybe we’re in a projection.", type: 'mushroom' },
+      { text: "I always thought that ceiling was watching me.", type: 'delusion' },
+    ]
+  },
+  {
+    id: 6,
+    text: "We come across a fork in the trail. There’s no signpost.",
+    options: [
+      { text: "I freeze. Choice has never been kind to me.", type: 'grief' },
+      { text: "I pick a direction and squeeze your hand. We’ll figure it out together.", type: 'real' },
+      { text: "I flip a coin made of bark and breath.", type: 'mushroom' },
+      { text: "I choose left. Left is always more poetic.", type: 'delusion' },
+    ]
+  },
+  {
+    id: 7,
+    text: "You ask me what I wanted to be when I grew up.",
+    options: [
+      { text: "Honestly? Someone who could come home to you.", type: 'real' },
+      { text: "Someone who didn’t end up like this.", type: 'grief' },
+      { text: "An oracle. Or a lizard. I forget which.", type: 'mushroom' },
+      { text: "Someone's favorite mystery.", type: 'delusion' },
+    ]
+  },
+  {
+    id: 8,
+    text: "There’s a sudden gust of wind. It feels like a warning.",
+    options: [
+      { text: "The forest is recalibrating the simulation.", type: 'mushroom' },
+      { text: "I tuck your hair behind your ear and keep walking.", type: 'real' },
+      { text: "I brace. It always ends this way.", type: 'grief' },
+      { text: "No, it’s a sign. Something is arriving.", type: 'delusion' },
+    ]
+  },
+  {
+    id: 9,
+    text: "You say you’ve been dreaming of a door in the woods.",
+    options: [
+      { text: "Maybe it's just a dream asking us to slow down. We could use that.", type: 'real' },
+      { text: "It’s probably an exit from this layer of consciousness.", type: 'mushroom' },
+      { text: "Maybe it leads home. Whatever that means.", type: 'delusion' },
+      { text: "I’ve seen it too. But I never open it.", type: 'grief' },
+    ]
+  },
+  {
+    id: 10,
+    text: "We pass a tree carved with names. Yours isn’t there.",
+    options: [
+      { text: "I don’t need a tree to prove I’m here. You holding my hand is enough.", type: 'real' },
+      { text: "I’ll carve it in backwards. Portals like that.", type: 'mushroom' },
+      { text: "Maybe this version of me was never born.", type: 'delusion' },
+      { text: "No one remembers me when I’m not around.", type: 'grief' },
+    ]
+  },
+  {
+    id: 11,
+    text: "You say I hum when I walk. I didn’t know that.",
+    options: [
+      { text: "Guess I’m happy. That’s what it sounds like on me.", type: 'real' },
+      { text: "The forest is harmonizing with me. Listen.", type: 'mushroom' },
+      { text: "Maybe the melody is from a past life.", type: 'delusion' },
+      { text: "It’s probably a self-soothing tic. Ignore it.", type: 'grief' },
+    ]
+  },
+  {
+    id: 12,
+    text: "A feather falls onto your shoulder. You look at me like it means something.",
+    options: [
+      { text: "Cool. Free feather.", type: 'real' },
+      { text: "That bird is watching us through spacetime.", type: 'mushroom' },
+      { text: "Nothing means anything. That’s the beauty of it.", type: 'grief' },
+      { text: "It’s a sign from a future we forgot.", type: 'delusion' },
+    ]
+  },
+  {
+    id: 13,
+    text: "You ask me what I think happens after we die.",
+    options: [
+      { text: "Maybe we wake up where we were meant to be.", type: 'delusion' },
+      { text: "No idea. But I like being alive with you.", type: 'real' },
+      { text: "Rot. Grief. A drawer full of receipts.", type: 'grief' },
+      { text: "Consciousness just logs into a new avatar.", type: 'mushroom' },
+    ]
+  },
+  {
+    id: 14,
+    text: "The path narrows. We have to walk single file now.",
+    options: [
+      { text: "I place my hand on your back so you know I’m right here.", type: 'real' },
+      { text: "Lines like this exist to disorient us.", type: 'mushroom' },
+      { text: "I imagine a world where you follow me instead.", type: 'delusion' },
+      { text: "This always happens. I end up behind.", type: 'grief' },
+    ]
+  },
+];
+
+// 15-23 (User Provided Continuation)
+const USER_MIDDLE = [
+  {
+    id: 15,
+    text: "You say the air smells like first days. I ask what that means.",
+    options: [
+      { text: "It’s the smell of everything not going wrong. Yet.", type: 'grief' },
+      { text: "Like the first time I saw you. That kind of air.", type: 'delusion' },
+      { text: "Like molecules remembering themselves. Origins, you know?", type: 'mushroom' },
+      { text: "Like laundry and lemon and maybe hope. I like it.", type: 'real' },
+    ]
+  },
+  {
+    id: 16,
+    text: "There’s a tree with a missing patch of bark shaped exactly like a lowercase 'g'.",
+    options: [
+      { text: "Probably someone peeled it off without thinking. That happens a lot.", type: 'grief' },
+      { text: "What if it’s the initial of the forest’s true name?", type: 'delusion' },
+      { text: "Letters appear when timelines overlap. It’s fine.", type: 'mushroom' },
+      { text: "You laugh and say it stands for 'goofball'. I pretend to be mad.", type: 'real' },
+    ]
+  },
+  {
+    id: 17,
+    text: "You say you’d follow me anywhere. I believe you.",
+    options: [
+      { text: "That’s what scares me.", type: 'grief' },
+      { text: "Even if I’m not real?", type: 'delusion' },
+      { text: "Even if 'me' means five parallel versions of this walk?", type: 'mushroom' },
+      { text: "Then let’s keep walking. That’s all we have to do.", type: 'real' },
+    ]
+  },
+  {
+    id: 18,
+    text: "We step over a log and I instinctively reach for your hand.",
+    options: [
+      { text: "I forgot you’re not always there.", type: 'grief' },
+      { text: "Even ghosts know how to touch.", type: 'delusion' },
+      { text: "This is probably a metaphor for rebirth. Or legs.", type: 'mushroom' },
+      { text: "I like how your hand fits mine without thinking about it.", type: 'real' },
+    ]
+  },
+  {
+    id: 19,
+    text: "You point out a nest in the branches. There’s something inside it.",
+    options: [
+      { text: "Dead hope. Just a bundle of it.", type: 'grief' },
+      { text: "A letter to the version of us that made it.", type: 'delusion' },
+      { text: "An echo. Like audio from a past timeline.", type: 'mushroom' },
+      { text: "A bird. Sitting. Breathing. That’s enough.", type: 'real' },
+    ]
+  },
+  {
+    id: 20,
+    text: "Your shoe gets caught in the mud. I watch your face as you pull it free.",
+    options: [
+      { text: "You always look like you’re trying not to vanish.", type: 'grief' },
+      { text: "I hope I remember this exact expression forever.", type: 'delusion' },
+      { text: "Mud has memory. You’ll see.", type: 'mushroom' },
+      { text: "You swear under your breath and we laugh about it later.", type: 'real' },
+    ]
+  },
+  {
+    id: 21,
+    text: "You ask what I miss most about being a kid.",
+    options: [
+      { text: "Not knowing how sharp things get.", type: 'grief' },
+      { text: "Making up stories and believing them.", type: 'delusion' },
+      { text: "That time wasn’t linear yet. Or maybe still isn’t.", type: 'mushroom' },
+      { text: "Going home after school and watching cartoons with toast.", type: 'real' },
+    ]
+  },
+  {
+    id: 22,
+    text: "We find a path made entirely of pine needles. It smells unreal.",
+    options: [
+      { text: "It smells like something I lost.", type: 'grief' },
+      { text: "This is how the stories start, right?", type: 'delusion' },
+      { text: "This place isn’t mapped. That’s why it’s safe.", type: 'mushroom' },
+      { text: "I breathe it in and feel something settle in my chest.", type: 'real' },
+    ]
+  },
+  {
+    id: 23,
+    text: "A dog appears, stares, and disappears again.",
+    options: [
+      { text: "Nothing loyal ever stays.", type: 'grief' },
+      { text: "That was a guardian spirit.", type: 'delusion' },
+      { text: "Glitch in the render. Dog.exe stopped working.", type: 'mushroom' },
+      { text: "Maybe he’s just heading home. Like us.", type: 'real' },
+    ]
+  },
+];
+
+// 35-54 (User Provided Continuation Part 2)
+const USER_LATE = [
+  {
+    id: 35,
+    text: "We spot a deer. It freezes. So do we.",
+    options: [
+      { text: "It sees the grief on me. Animals always know.", type: 'grief' },
+      { text: "Maybe it’s waiting for us to speak first.", type: 'delusion' },
+      { text: "That’s not a deer. That’s a messenger.", type: 'mushroom' },
+      { text: "We nod at each other like old friends, then move on.", type: 'real' },
+    ]
+  },
+  {
+    id: 36,
+    text: "You ask if I’ve ever stolen anything.",
+    options: [
+      { text: "Yeah. Time. From people who deserved more.", type: 'grief' },
+      { text: "Does a life that never happened count?", type: 'delusion' },
+      { text: "Only once: a vibrating crystal from a gift shop. It hummed for days.", type: 'mushroom' },
+      { text: "A pen. From a bank. In 2017. I still use it.", type: 'real' },
+    ]
+  },
+  {
+    id: 37,
+    text: "You ask what I think dreams are.",
+    options: [
+      { text: "Punishment with a pretty filter.", type: 'grief' },
+      { text: "Alternate memories from lives I never got to live.", type: 'delusion' },
+      { text: "Dimensional sidequests. You just don’t remember the loot.", type: 'mushroom' },
+      { text: "My brain doing improv with weird lighting.", type: 'real' },
+    ]
+  },
+  {
+    id: 38,
+    text: "You hand me a leaf shaped like a heart. It’s got a hole in the middle.",
+    options: [
+      { text: "Of course it does.", type: 'grief' },
+      { text: "Even love gets ventilation.", type: 'delusion' },
+      { text: "A portal. Nice find.", type: 'mushroom' },
+      { text: "Romantic and mildly fungal. Just my type.", type: 'real' },
+    ]
+  },
+  {
+    id: 39,
+    text: "A low branch almost hits you. I stop you just in time.",
+    options: [
+      { text: "I always notice right before things break.", type: 'grief' },
+      { text: "Maybe this was one of the moments that changes everything.", type: 'delusion' },
+      { text: "In another timeline, that branch was a sword. You thanked me anyway.", type: 'mushroom' },
+      { text: "You say 'nice catch' like I do this every day. Maybe I do.", type: 'real' },
+    ]
+  },
+  {
+    id: 40,
+    text: "You say the clouds look like countries. I see none of them.",
+    options: [
+      { text: "Maybe I lost the part of me that sees shapes in sky.", type: 'grief' },
+      { text: "I see your face instead. That feels like enough.", type: 'delusion' },
+      { text: "I see two galactic empires mid-negotiation.", type: 'mushroom' },
+      { text: "I see a bread roll. That counts, right?", type: 'real' },
+    ]
+  },
+  {
+    id: 41,
+    text: "We come across a swing tied to a tree. It’s too small for either of us.",
+    options: [
+      { text: "I push it once. It creaks like a memory.", type: 'grief' },
+      { text: "I imagine a child version of me sitting there, smiling.", type: 'delusion' },
+      { text: "Whoever tied this left a message. We’ll decode it later.", type: 'mushroom' },
+      { text: "You try to sit anyway and get stuck. We both laugh until it hurts.", type: 'real' },
+    ]
+  },
+  {
+    id: 42,
+    text: "You stop to tie your shoe. I watch your back.",
+    options: [
+      { text: "So familiar it aches.", type: 'grief' },
+      { text: "I wish I could press pause here, just for a little longer.", type: 'delusion' },
+      { text: "That spine’s seen some interdimensional shit.", type: 'mushroom' },
+      { text: "You always double knot. I find that weirdly comforting.", type: 'real' },
+    ]
+  },
+  {
+    id: 43,
+    text: "We hear a sound in the bushes. Neither of us moves.",
+    options: [
+      { text: "If it takes me, don’t follow. I’m tired anyway.", type: 'grief' },
+      { text: "Maybe it's the version of me that stayed.", type: 'delusion' },
+      { text: "It’s fine. Parallel entities get curious too.", type: 'mushroom' },
+      { text: "Could be a squirrel. Could be a murder plot. Either way, I’m holding your hand.", type: 'real' },
+    ]
+  },
+  {
+    id: 44,
+    text: "You ask if I think we’ve done this walk before.",
+    options: [
+      { text: "If we had, maybe I would’ve known what to say this time.", type: 'grief' },
+      { text: "I think we do it in dreams. Or afterlives. Or something.", type: 'delusion' },
+      { text: "Yes, and also no, depending on the observer’s speed.", type: 'mushroom' },
+      { text: "Not like this. Not with snacks packed and everything.", type: 'real' },
+    ]
+  },
+  {
+    id: 45,
+    text: "You ask me if I believe in signs.",
+    options: [
+      { text: "I used to. Until they all pointed nowhere.", type: 'grief' },
+      { text: "Only when they appear in threes. Or in your voice.", type: 'delusion' },
+      { text: "Yes. Especially if they flicker or hum.", type: 'mushroom' },
+      { text: "Sometimes. But I believe in you more.", type: 'real' },
+    ]
+  },
+  {
+    id: 46,
+    text: "There’s a stump shaped exactly like a question mark.",
+    options: [
+      { text: "Of course there is. This place is full of things that don’t answer back.", type: 'grief' },
+      { text: "Maybe it’s asking who we would’ve been somewhere else.", type: 'delusion' },
+      { text: "That stump is sentient. Don’t sit on it.", type: 'mushroom' },
+      { text: "You laugh and say it’s punctuation for the forest. I believe you.", type: 'real' },
+    ]
+  },
+  {
+    id: 47,
+    text: "You toss a pebble into a puddle. It doesn’t make a sound.",
+    options: [
+      { text: "Some silences are heavier than screams.", type: 'grief' },
+      { text: "Maybe it landed in another version of the puddle.", type: 'delusion' },
+      { text: "Sound delay. Reality buffering.", type: 'mushroom' },
+      { text: "I shrug and say 'stealth mode'. You snort.", type: 'real' },
+    ]
+  },
+  {
+    id: 48,
+    text: "You say walking with me feels like being inside a story.",
+    options: [
+      { text: "Then why do I feel like the backstory no one mentions?", type: 'grief' },
+      { text: "Maybe we are. But the writer left.", type: 'delusion' },
+      { text: "Which genre? I hope it’s slow-burn cosmic horror.", type: 'mushroom' },
+      { text: "Cool. Hope it has a good ending. Preferably with snacks.", type: 'real' },
+    ]
+  },
+  {
+    id: 49,
+    text: "You ask me what I think love actually is.",
+    options: [
+      { text: "A slow erosion you don’t notice until it’s gone.", type: 'grief' },
+      { text: "The imaginary friend who stayed too long.", type: 'delusion' },
+      { text: "A molecular deal we don’t remember signing.", type: 'mushroom' },
+      { text: "Holding hands on a weird little walk. And meaning it.", type: 'real' },
+    ]
+  },
+  {
+    id: 50,
+    text: "We stop at a tree with a spiral carved into it. You ask what it means.",
+    options: [
+      { text: "That we’re never really out of the loop.", type: 'grief' },
+      { text: "That time bends for the ones who miss each other the most.", type: 'delusion' },
+      { text: "That’s a portal marker. Don’t touch it unless you’re sure.", type: 'mushroom' },
+      { text: "That people get bored in forests too.", type: 'real' },
+    ]
+  },
+  {
+    id: 51,
+    text: "You ask if you’ve changed since we met.",
+    options: [
+      { text: "No. You’re still the ghost of something I wanted.", type: 'grief' },
+      { text: "A little. You laugh softer. Like you don’t want to wake something.", type: 'delusion' },
+      { text: "Your aura shifts more easily now. In a good way.", type: 'mushroom' },
+      { text: "Yeah. You’re better at packing snacks. Also more patient with me.", type: 'real' },
+    ]
+  },
+  {
+    id: 52,
+    text: "We find a fence that wasn’t there before.",
+    options: [
+      { text: "Everything safe is behind a fence. Figures.", type: 'grief' },
+      { text: "Maybe it’s to keep the dream in.", type: 'delusion' },
+      { text: "A temporal barrier. We’ve walked too far.", type: 'mushroom' },
+      { text: "We walk around it. No big deal.", type: 'real' },
+    ]
+  },
+  {
+    id: 53,
+    text: "You say my voice changes when I talk to animals.",
+    options: [
+      { text: "I think I want them to like me more than people do.", type: 'grief' },
+      { text: "Maybe they remember me from before.", type: 'delusion' },
+      { text: "It’s a vibrational thing. I go full druid without noticing.", type: 'mushroom' },
+      { text: "You’re just jealous they get my best material.", type: 'real' },
+    ]
+  },
+  {
+    id: 54,
+    text: "We pause on a bridge. There’s no water under it.",
+    options: [
+      { text: "Even the river gave up on this part of the story.", type: 'grief' },
+      { text: "Maybe the water’s invisible. Like memory.", type: 'delusion' },
+      { text: "Time glitch. We’re walking over a ghost stream.", type: 'mushroom' },
+      { text: "Still a nice view. I like being here with you.", type: 'real' },
+    ]
+  }
+];
+
+// Mushroom Specific Questions (26-33 provided)
+const MUSHROOM_BRANCH = [
+  {
+    id: 26,
+    text: "The trees are breathing now. Loudly.",
+    options: [
+      { text: "They’re sighing. It’s grief. I get it.", type: 'grief' },
+      { text: "They remember me. Or someone I used to be.", type: 'delusion' },
+      { text: "We synced breath patterns hours ago. Keep up.", type: 'mushroom' },
+      { text: "I focus on your hand in mine. Still real. Still here.", type: 'real' },
+    ]
+  },
+  {
+    id: 27,
+    text: "You say the forest has its own alphabet.",
+    options: [
+      { text: "It spells 'leave' every time I look.", type: 'grief' },
+      { text: "It’s writing love letters we forgot to send.", type: 'delusion' },
+      { text: "Every leaf is a consonant. The moss is all vowels.", type: 'mushroom' },
+      { text: "I nod like I understand and offer you gum.", type: 'real' },
+    ]
+  },
+  {
+    id: 28,
+    text: "Time has stopped. The birds are buffering.",
+    options: [
+      { text: "Even time gives up on me sometimes.", type: 'grief' },
+      { text: "Maybe we’re paused until we make the right choice.", type: 'delusion' },
+      { text: "We’re outside the rendering engine. Untextured space. Sick.", type: 'mushroom' },
+      { text: "I check the time on my phone and it’s fine. You’re just high.", type: 'real' },
+    ]
+  },
+  {
+    id: 29,
+    text: "You meet a caterpillar who knows your name.",
+    options: [
+      { text: "I ask if it remembers who I used to be. It doesn’t.", type: 'grief' },
+      { text: "It’s been waiting to finish our last conversation.", type: 'delusion' },
+      { text: "He’s my assigned guide. I nod respectfully.", type: 'mushroom' },
+      { text: "I name him Greg. He seems chill.", type: 'real' },
+    ]
+  },
+  {
+    id: 30,
+    text: "The sky folds in half like paper.",
+    options: [
+      { text: "That's what happens when you think too much.", type: 'grief' },
+      { text: "I whisper your name and it creases differently.", type: 'delusion' },
+      { text: "New layer unlocked. Let’s go.", type: 'mushroom' },
+      { text: "I blink until it looks normal again. Sort of.", type: 'real' },
+    ]
+  },
+  {
+    id: 31,
+    text: "You suddenly remember a childhood toy that never existed.",
+    options: [
+      { text: "I miss it like I miss people who left.", type: 'grief' },
+      { text: "It’s from the life where we stayed together longer.", type: 'delusion' },
+      { text: "Mandela Effect or bleedthrough? Doesn’t matter. It’s real now.", type: 'mushroom' },
+      { text: "I try to describe it out loud. We both laugh-cry.", type: 'real' },
+    ]
+  },
+  {
+    id: 32,
+    text: "A giant eye opens in the soil. Blinks once. Closes.",
+    options: [
+      { text: "Even the earth is tired of watching me.", type: 'grief' },
+      { text: "I think it saw the part of me I keep buried.", type: 'delusion' },
+      { text: "Respect. Portal creature doing its job.", type: 'mushroom' },
+      { text: "Okay. We are not coming back to this spot ever.", type: 'real' },
+    ]
+  },
+  {
+    id: 33,
+    text: "You say everything smells like neon today.",
+    options: [
+      { text: "I wish I could forget how that smells.", type: 'grief' },
+      { text: "Like the vending machine light that always flickered at your place.", type: 'delusion' },
+      { text: "Synesthesia kicking in. The air tastes like purple.", type: 'mushroom' },
+      { text: "I sniff the air. 'Pine,' I correct you. 'Just pine.'", type: 'real' },
+    ]
+  }
+];
+
+// Content for the "Memory Fragments" (Interstitials)
+const MEMORY_FRAGMENTS = [
+  "I remember the way you looked at me when I tripped and fell years ago, walking down the campus. You didn't laugh. I knew you wanted to. I loved you so much in that silence.",
+  "Your mother called me by your ex's name for three years. I never corrected her. I thought it was a test. Was it?",
+  "We sat on the roof and you told me you were afraid of becoming 'boring'. I lied and said you were the most interesting person I knew. You are the most interesting to me though, even in the way you grow boring. Day by day, making boring look so effortlessly cool.",
+  "That trip to Ikea where we didn't speak for 4 hours. We bought the meatballs anyway. We ate them in the car like fugitives.",
+  "You sleep with your socks on. It remains the most disturbing thing about you.",
+  "I found a list of 'Goals' in your old notebook. Number 4 was 'Learn to teleport'. You checked it off.",
+];
+
+// Additional fragments for standard path so they don't repeat in second half
+const STANDARD_LATE_FRAGMENTS = [
+  "We bought a plant once. We named it 'Robert'. It died in a week. We kept the pot for three years.",
+  "You have a specific way of sneezing. It sounds like a question. I never answer it.",
+  "I watched you sleep once. You looked like you were solving a complex math problem.",
+  "We argued about which way was North. We were both wrong. We were walking East.",
+  "You saved a ticket stub from a movie we hated. You used it as a bookmark.",
+  "I tried to cook your favorite meal. I burnt it. We ate cereal. It was better."
+];
+
+const MUSHROOM_FRAGMENTS = [
+  "The trees are breathing. Not metaphorically. I can see their lungs.",
+  "I remember when we dissolved into light. It was Tuesday. We had tacos after.",
+  "Time is a flat circle, but this walk is a triangle. Watch the corners.",
+  "The squirrel is back. It’s wearing a tiny suit. It wants to discuss my credit score.",
+  "I looked at my hand and saw your face. I looked at your face and saw the universe.",
+  "We are vibrating at 432Hz. This is the optimal frequency for forgetting.",
+];
+
+// --- ENDING DATA ---
+const ENDINGS = {
+  grief: {
+    story: "The walk ends at a bench. I sit down, but you keep walking. You keep walking until you fade into the treeline, then into the mist, then into nothing. I remember now. The funeral was six years ago. It was a nice service. I come here to talk to you, and for a while, the echo answers back. But the signal is getting weaker. I’m just talking to the trees now.",
+    color: "from-gray-900 via-slate-800 to-black",
+    icon: Skull
+  },
+  delusion: {
+    story: "The forest clears and we are in a ballroom. No, a castle. No, it’s just our living room, but the lighting is perfect. You tell me you’re actually a prince in exile. I believe you. I’ve always believed you. We are 84 years old, holding hands in a nursing home garden, pretending we are young explorers. The nurse brings us pudding. We call it 'ambrosia'.",
+    color: "from-pink-900 via-rose-800 to-red-950",
+    icon: Heart
+  },
+  mushroom: {
+    story: "The sky peels back like a sticker. Behind it is just raw data and love. We aren't walking; we are lying on the carpet in the living room. It's 3 AM. We found those mushrooms near the trailhead. You said they looked like cartoon toadstools. I said we shouldn't. We did anyway. You are explaining how the ceiling fan is God. I am crying because the concept of 'knees' feels so beautiful and unnecessary. We are safe. We are infinite.",
+    color: "from-indigo-900 via-purple-800 to-fuchsia-900",
+    icon: Sparkles
+  },
+  real: {
+    story: "We get back to the car. My feet hurt. You ask if I want to get pizza. I say yes. We drive home listening to a podcast about murder. You are 32. I am 32. We are out of shape, slightly in debt, and very much in love. The air smells like rain. It’s enough. It’s everything.",
+    color: "from-emerald-900 via-green-800 to-teal-950",
+    icon: Sun
+  }
+};
+
+// --- COMPONENT ---
+
+const TheWalk = () => {
+  const [gameState, setGameState] = useState('intro'); // intro, walking, fragment, ending
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [path, setPath] = useState('standard'); // standard, mushroom
+  const [scores, setScores] = useState({ grief: 0, delusion: 0, mushroom: 0, real: 0 });
+  const [bgIndex, setBgIndex] = useState(0);
+  
+  // Calculate final result
+  const finalResult = useMemo(() => {
+    return Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+  }, [scores]);
+
+  // Construct and randomize the full question set
+  const allQuestions = useMemo(() => {
+    // 1. Start with the Intro 4 (1-4)
+    let questions = [...INTRO_QUESTIONS];
+
+    // 2. Add User Opening (5-14)
+    questions = questions.concat(USER_OPENING);
+
+    // 3. Add User Middle (15-23)
+    questions = questions.concat(USER_MIDDLE);
+
+    // 4. Fill gaps (24-25)
+    questions.push(
+      {
+        id: 24,
+        text: "You point at a cloud. It looks suspicious.",
+        options: [
+          { text: "Clouds are just vapor. Relax.", type: 'real' },
+          { text: "It's watching us.", type: 'delusion' },
+          { text: "That cloud is a loading bar for the sky.", type: 'mushroom' },
+          { text: "Just another thing that will disappear.", type: 'grief' },
+        ]
+      },
+      {
+        id: 25,
+        text: "We stop to tie a shoe. Silence falls.",
+        options: [
+          { text: "I hate the silence.", type: 'grief' },
+          { text: "It's peaceful.", type: 'real' },
+          { text: "The silence is loud.", type: 'mushroom' },
+          { text: "Silence is just the world holding its breath.", type: 'delusion' },
+        ]
+      }
+    );
+
+    // 5. Construct Late Game (26-50)
+    const lateQuestions = USER_LATE.slice(0, 25); 
+
+    lateQuestions.forEach((q, idx) => {
+      const actualIndex = 26 + idx;
+      
+      const mushroomVariant = MUSHROOM_BRANCH.find(mq => mq.id === actualIndex);
+
+      questions.push({
+        id: actualIndex,
+        branch: mushroomVariant ? 'both' : 'standard', 
+        standardText: q.text,
+        mushroomText: mushroomVariant ? mushroomVariant.text : q.text,
+        standardOptions: q.options,
+        mushroomOptions: mushroomVariant ? mushroomVariant.options : q.options,
+      });
+    });
+    
+    // Fill remaining if needed
+    for (let i = 46; i < 50; i++) {
+       questions.push({
+        id: i,
+        text: "The path is fading. We are almost there.",
+        options: [
+          { text: "Finally.", type: 'real' },
+          { text: "I don't want it to end.", type: 'delusion' },
+          { text: "Endings are just beginnings backwards.", type: 'mushroom' },
+          { text: "It ended a long time ago.", type: 'grief' },
+        ]
+       });
+    }
+
+    // Final Question
+    questions.push({
+      id: 50,
+      text: "Are you ready to see where your answers led you?",
+      options: [
+        { text: "Yes.", type: 'end' }
+      ]
+    });
+
+    // RANDOMIZE OPTIONS
+    return questions.map(q => {
+      // If it's a branched question
+      if (q.branch === 'both' || q.standardOptions) {
+        return {
+          ...q,
+          standardOptions: shuffle(q.standardOptions || q.options),
+          mushroomOptions: shuffle(q.mushroomOptions || q.options)
+        };
+      }
+      // Standard question
+      return {
+        ...q,
+        options: shuffle(q.options)
+      };
+    });
+  }, []);
+
+  const resetGame = () => {
+    setGameState('intro');
+    setQuestionIndex(0);
+    setScores({ grief: 0, delusion: 0, mushroom: 0, real: 0 });
+    setPath('standard');
+    setBgIndex(0);
+  };
+
+  // Handle User Choice
+  const handleAnswer = (type) => {
+    // 1. Update Score
+    if (type !== 'end') {
+      setScores(prev => ({ ...prev, [type]: prev[type] + 1 }));
+    }
+
+    const nextIndex = questionIndex + 1;
+
+    // 2. Branch Logic at Q25
+    if (nextIndex === 25) {
+      const currentHighest = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+      if (currentHighest === 'mushroom') {
+        setPath('mushroom');
+      }
+    }
+
+    // 3. Check for Ending
+    if (nextIndex > 49) {
+      setGameState('ending');
+      return;
+    }
+
+    // 4. Check for Memory Fragment (Every 4 questions)
+    if (nextIndex % 4 === 0 && nextIndex !== 0) {
+      setQuestionIndex(nextIndex);
+      setBgIndex(prev => prev + 1);
+      setGameState('fragment');
+    } else {
+      setQuestionIndex(nextIndex);
+      setGameState('walking');
+    }
+  };
+
+  const handleFragmentNext = () => {
+    setGameState('walking');
+  };
+
+  // --- RENDERING HELPERS ---
+
+  const getBackground = () => {
+    if (gameState === 'intro') return "bg-gray-900";
+    if (gameState === 'ending') return "bg-white"; // White background for ending
+    
+    // Dynamic background shifting
+    const baseColors = [
+      "from-slate-900 to-stone-800",
+      "from-stone-800 to-gray-900",
+      "from-gray-900 to-zinc-800",
+      "from-zinc-800 to-neutral-900",
+    ];
+
+    const mushroomColors = [
+      "from-indigo-950 to-purple-900",
+      "from-purple-900 to-fuchsia-950",
+      "from-violet-950 to-indigo-900",
+      "from-slate-900 via-purple-900 to-black"
+    ];
+
+    const palette = path === 'mushroom' && questionIndex > 25 ? mushroomColors : baseColors;
+    return `bg-gradient-to-b ${palette[bgIndex % palette.length]}`;
+  };
+
+  const currentQuestion = allQuestions[questionIndex];
+  
+  // Logic to show correct text based on path for branched questions
+  const isMushroomPath = path === 'mushroom';
+  const questionText = currentQuestion.branch === 'both' && isMushroomPath
+    ? currentQuestion.mushroomText 
+    : (currentQuestion.standardText || currentQuestion.text);
+
+  const currentOptions = (currentQuestion.branch === 'both' || currentQuestion.standardOptions)
+    ? (isMushroomPath ? currentQuestion.mushroomOptions : currentQuestion.standardOptions)
+    : currentQuestion.options;
+
+  const fragmentText = () => {
+    const fragmentIdx = (questionIndex / 4) - 1;
+    
+    // Logic: First 6 fragments (index 0-5) are shared/standard.
+    // Fragments 6-11 (second half) depend on path.
+    if (fragmentIdx >= 6) {
+        const adjustedIdx = fragmentIdx - 6;
+        if (path === 'mushroom') {
+             return MUSHROOM_FRAGMENTS[adjustedIdx % MUSHROOM_FRAGMENTS.length];
+        } else {
+             return STANDARD_LATE_FRAGMENTS[adjustedIdx % STANDARD_LATE_FRAGMENTS.length];
+        }
+    }
+    
+    return MEMORY_FRAGMENTS[fragmentIdx % MEMORY_FRAGMENTS.length];
+  };
+
+  // --- SCREENS ---
+
+  if (gameState === 'intro') {
+    return (
+      <div className="min-h-screen bg-black text-stone-200 font-mono flex flex-col items-center justify-center p-8 text-center">
+        <div className="max-w-md space-y-8 animate-fade-in">
+          <Trees size={64} className="mx-auto text-emerald-800/50 mb-8" />
+          <h1 className="text-4xl tracking-[0.2em] font-light uppercase border-b border-stone-800 pb-4">The Walk</h1>
+          <p className="text-sm leading-relaxed text-stone-500">
+            A 50-question interactive narrative. <br/>
+            You are on a walk with your partner. <br/>
+            The forest is quiet. You are mostly honest.
+          </p>
+           <p className="text-xs leading-relaxed text-stone-600 mt-4">
+            Your answers change the outcome. <br/>
+            One of 4 possible endings.
+          </p>
+          <button 
+            onClick={() => setGameState('walking')}
+            className="group flex items-center gap-2 mx-auto text-stone-400 hover:text-white transition-colors pt-12"
+          >
+            <span className="uppercase tracking-widest text-xs">Begin Walk</span>
+            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (gameState === 'ending') {
+    const ending = ENDINGS[finalResult];
+    // No icon, no title, just story. Dark text.
+    return (
+      <div className={`min-h-screen ${getBackground()} text-gray-900 font-sans flex flex-col items-center justify-center p-8 transition-colors duration-1000`}>
+        <div className="max-w-2xl space-y-8 text-center animate-fade-in-up">
+          <div className="text-lg md:text-xl leading-loose font-light opacity-90 font-serif">
+            {ending.story}
+          </div>
+          
+          <div className="pt-24 flex justify-center">
+            <button 
+              onClick={resetGame}
+              className="border border-gray-900 text-gray-900 px-6 py-2 uppercase text-xs tracking-widest hover:bg-gray-900 hover:text-white transition-colors"
+            >
+              ANOTHER WALK?
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (gameState === 'fragment') {
+    return (
+      <div className={`min-h-screen ${getBackground()} flex items-center justify-center p-8 transition-colors duration-700`}>
+        <div className="max-w-lg w-full space-y-6">
+          <div className="w-12 h-0.5 bg-white/20 mb-8"></div>
+          <p className="text-xl md:text-2xl font-serif text-white/90 leading-relaxed italic">
+            "{fragmentText()}"
+          </p>
+          <button 
+            onClick={handleFragmentNext}
+            className="mt-12 text-xs uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+          >
+            Continue Walking &rarr;
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // GAMESTATE: WALKING (Question View)
+  return (
+    <div className={`min-h-screen ${getBackground()} text-stone-200 font-sans flex flex-col transition-colors duration-1000`}>
+      {/* Progress Bar (Minimal) */}
+      <div className="w-full h-1 bg-white/5">
+        <div 
+          className="h-full bg-white/20 transition-all duration-300" 
+          style={{ width: `${(questionIndex / 50) * 100}%` }}
+        />
+      </div>
+
+      <div className="flex-grow flex flex-col items-center justify-center p-6 md:p-12">
+        <div className="max-w-2xl w-full space-y-12 animate-fade-in">
+          
+          <div className="space-y-2">
+            <span className="text-xs font-mono text-white/30 uppercase tracking-widest">
+              KM {questionIndex + 1}.0
+            </span>
+            <h2 className="text-2xl md:text-3xl font-light leading-normal text-white/90">
+              {questionText}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            {currentOptions.map((option, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleAnswer(option.type)}
+                className="group text-left p-4 md:p-6 border border-white/10 rounded-sm hover:bg-white/5 hover:border-white/30 transition-all duration-200"
+              >
+                <span className="text-white/60 group-hover:text-white text-sm md:text-base font-light tracking-wide transition-colors">
+                  {option.text}
+                </span>
+              </button>
+            ))}
+          </div>
+
+        </div>
+      </div>
+      
+      {/* Footer Status */}
+      <div className="p-6 flex justify-between items-center text-xs text-white/20 font-mono">
+        <span>THE WALK</span>
+        <span>{path === 'mushroom' ? '👁️' : '🌲'}</span>
+      </div>
+    </div>
+  );
+};
+
+export default TheWalk;

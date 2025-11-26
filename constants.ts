@@ -2,6 +2,7 @@
 import { Project, Song, ChaosLinkItem } from './types';
 
 export const PROJECTS: Project[] = [
+        { id: '29', title: 'The Walk', url: '/thewalk.html', emoji: '🚶' },
       { id: '28', title: 'Tiny Harvest - Farming Sim', url: '/tinyharvest.html', emoji: '🌱' },
     { id: '23', title: "Alien Sudoku", url: "/aliensudoku.html", emoji: "👽" },
     { id: '24', title: "Hayırlı Olsun Reaffirmer", url: "/hayirliolsun.html", emoji: "🧿" },
