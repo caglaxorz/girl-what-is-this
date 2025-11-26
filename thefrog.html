@@ -133,7 +133,7 @@
         // 3. Auto-move timer (2-4 seconds random)
         function resetAutoMove() {
             clearTimeout(moveTimer);
-            const randomTime = Math.random() * 2000 + 2000; // 2000ms to 4000ms
+            const randomTime = Math.random() * 500 + 500; // 500ms to 1000ms
             moveTimer = setTimeout(moveFrog, randomTime);
         }
 
