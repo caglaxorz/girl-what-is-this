@@ -4,32 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catch the Frog</title>
-    <script>
-      // ...existing code...
-      // Place frog at random position
-      function moveFrog() {
-        const frog = document.getElementById('frog');
-        const w = window.innerWidth - 80;
-        const h = window.innerHeight - 80;
-        frog.style.left = Math.random() * w + 'px';
-        frog.style.top = Math.random() * h + 'px';
-      }
-      // Move frog every 0.5 seconds
-      setInterval(moveFrog, 500);
-      // ...existing code...
-      // On click, move frog
-      document.getElementById('frog').addEventListener('click', moveFrog);
-      // ...existing code...
-    </script>
+
+
+
+        body {
+          min-height: 100vh;
+          margin: 0;
+          /* Fun pond-like gradient background */
+          background: radial-gradient(ellipse at 60% 40%, #b2f7ef 0%, #6ec6ca 60%, #3a8d99 100%);
+          overflow: hidden;
+        }
 
         #frog {
-            position: absolute;
-            font-size: 80px;
-            cursor: pointer;
-            transition: transform 0.1s;
-            user-select: none;
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
-            z-index: 10;
+          position: absolute;
+          font-size: 80px;
+          cursor: pointer;
+          transition: transform 0.1s, left 0.3s, top 0.3s;
+          user-select: none;
+          filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
+          z-index: 10;
         }
 
         #frog:active {
@@ -305,106 +298,87 @@
 
 
 
+
     <div id="overlay">Click the Frog... if you can.</div>
     <div id="frog">🐸</div>
 
     <script>
-        const frog = document.getElementById('frog');
-        const overlay = document.getElementById('overlay');
-        let moveTimer;
+      // --- FROG GAME LOGIC ---
+      const frog = document.getElementById('frog');
+      const overlay = document.getElementById('overlay');
+      let moveInterval;
 
-        // Taunt messages
-        const taunts = [
-            "nope", "try again", "too slow", "you wish", 
-            "boing!", "missed me", "nice try", "lmao", 
-            "almost", "catch me", "sike"
-        ];
+      // Taunt messages
+      const taunts = [
+        "nope", "try again", "too slow", "you wish",
+        "boing!", "missed me", "nice try", "lmao",
+        "almost", "catch me", "sike"
+      ];
 
-        // 1. Audio Context for the "Boing" sound
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = new AudioContext();
+      // Audio Context for the "Boing" sound
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioContext();
 
-        function playBoing() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            
-            // "Boing" effect: Slide pitch up rapidly
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(200, audioCtx.currentTime); 
-            oscillator.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.15);
-            
-            // Fade out
-            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + 0.2);
-        }
+      function playBoing() {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.15);
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.2);
+      }
 
-        // 2. Movement Logic
-        function moveFrog() {
-            // Screen boundaries
-            const maxWidth = window.innerWidth - 100; // minus frog size
-            const maxHeight = window.innerHeight - 100;
+      // Move frog to a random position on the screen
+      function moveFrog() {
+        const frogSize = 80;
+        const maxWidth = window.innerWidth - frogSize;
+        const maxHeight = window.innerHeight - frogSize;
+        const randomX = Math.random() * maxWidth;
+        const randomY = Math.random() * maxHeight;
+        frog.style.left = randomX + 'px';
+        frog.style.top = randomY + 'px';
+        // Random rotation for fun
+        const randomRot = (Math.random() * 40) - 20;
+        frog.style.transform = `rotate(${randomRot}deg)`;
+      }
 
-            const randomX = Math.random() * maxWidth;
-            const randomY = Math.random() * maxHeight;
+      // Move frog every 0.5 seconds
+      function startAutoMove() {
+        if (moveInterval) clearInterval(moveInterval);
+        moveInterval = setInterval(moveFrog, 500);
+      }
 
-            frog.style.left = randomX + 'px';
-            frog.style.top = randomY + 'px';
-            
-            // Random rotation for chaos
-            const randomRot = (Math.random() * 40) - 20;
-            frog.style.transform = `rotate(${randomRot}deg)`;
+      // Show taunt text at click position
+      function showTaunt(x, y) {
+        const el = document.createElement('div');
+        el.classList.add('taunt');
+        el.innerText = taunts[Math.floor(Math.random() * taunts.length)];
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+      }
 
-            resetAutoMove();
-        }
-
-        // 3. Auto-move timer (2-4 seconds random)
-        function resetAutoMove() {
-            clearTimeout(moveTimer);
-            const randomTime = Math.random() * 2000 + 2000; // 2000ms to 4000ms
-            moveTimer = setTimeout(moveFrog, randomTime);
-        }
-
-        // 4. Click Handler
-        frog.addEventListener('mousedown', (e) => {
-            // Hide intro overlay
-            overlay.style.opacity = '0';
-
-            // Play sound
-            playBoing();
-
-            // Show Taunt Text
-            showTaunt(e.clientX, e.clientY);
-
-            // Move Instantly
-            moveFrog();
-        });
-
-        function showTaunt(x, y) {
-            const el = document.createElement('div');
-            el.classList.add('taunt');
-            el.innerText = taunts[Math.floor(Math.random() * taunts.length)];
-            
-            // Position near the click
-            el.style.left = x + 'px';
-            el.style.top = y + 'px';
-            
-            document.body.appendChild(el);
-            
-            // Cleanup DOM
-            setTimeout(() => el.remove(), 1000);
-        }
-
-        // Init
+      // On click, play sound, show taunt, move frog
+      frog.addEventListener('mousedown', (e) => {
+        overlay.style.opacity = '0';
+        playBoing();
+        showTaunt(e.clientX, e.clientY);
         moveFrog();
+      });
 
+      // Responsive: move frog if window resizes
+      window.addEventListener('resize', moveFrog);
+
+      // Init
+      moveFrog();
+      startAutoMove();
     </script>
 </body>
 </html>
