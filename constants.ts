@@ -4,7 +4,7 @@ import { Project, Song, ChaosLinkItem } from './types';
 export const PROJECTS: Project[] = [
   { id: '1', title: 'Husband Finder', url: '/husband-finder.html', emoji: '💍' },
   { id: '3', title: 'Particularly', url: '/particularly.html', emoji: '✨' },
-  { id: '4', title: 'Hangi Manifest Kızısın', url: '/hangimanifest.html', emoji: '🔮' },
+  { id: '4', title: 'Hangi Manifest Kızısın?', url: '/hangimanifest.html', emoji: '🔮' },
   { id: '5', title: 'Page in a Page', url: '/page-in-page.html', emoji: '🕸️' },
   { id: '6', title: 'Which 2003 Lyric Are U?', url: '/2003lyrics.html', emoji: '🎤' },
   { id: '7', title: '✨Anket Defteri✨', url: '/anketdefteri.html', emoji: '📔' },
