@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -600,8 +599,8 @@
 
             const pos = getMousePos(e);
             
-            // Update Coords in status bar. Fix: escaped template literal.
-            coordsDisplay.innerText = \`\${Math.floor(pos.x)},\${Math.floor(pos.y)}\`;
+            // Update Coords in status bar
+            coordsDisplay.innerText = `${Math.floor(pos.x)},${Math.floor(pos.y)}`;
 
             ctx.lineWidth = size;
             ctx.lineCap = 'round';
@@ -624,8 +623,7 @@
             else if (tool === 'star') {
                 // Just draws stars on click/drag
                 ctx.fillStyle = color;
-                // Fix: escaped template literal.
-                ctx.font = \`\${size * 3}px Arial\`;
+                ctx.font = `${size * 3}px Arial`;
                 ctx.fillText("★", pos.x, pos.y);
             }
             else {

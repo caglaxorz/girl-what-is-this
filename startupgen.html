@@ -1,76 +1,168 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disrupt.io - Startup Generator</title>
+    <title>Stealth Mode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --accent: #2563eb; /* Tech Blue */
+        }
+
         body {
             margin: 0;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background: #1a1a1a;
-            color: #fff;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .container {
+            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
             text-align: center;
-            padding: 40px;
-            border: 1px solid #333;
-            background: #222;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
         }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
+
+        /* Abstract Background Shape */
+        .blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, -20px); }
+        }
+
+        .badge {
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            color: #00d2ff;
+            color: var(--accent);
+            background: #eff6ff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-block;
         }
-        .pitch {
-            font-size: 32px;
-            font-weight: bold;
-            margin: 30px 0;
-            line-height: 1.4;
-            min-height: 100px;
+
+        .logo-name {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            margin: 0;
+            background: linear-gradient(to right, #111827, #4b5563);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .tagline {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            color: var(--text-sub);
+            font-weight: 300;
+            max-width: 600px;
+            line-height: 1.5;
+            margin-bottom: 3rem;
+            min-height: 3em;
+        }
+
+        .btn-group {
             display: flex;
-            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
             justify-content: center;
+            position: relative;
+            z-index: 10;
         }
-        .highlight {
-            color: #00d2ff;
-            background: rgba(0, 210, 255, 0.1);
-            padding: 0 5px;
-            border-radius: 4px;
-        }
-        button {
-            background: #00d2ff;
-            color: #000;
+
+        .primary-btn {
+            background-color: var(--text-main);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
             border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
             cursor: pointer;
-            border-radius: 50px;
-            transition: transform 0.1s, box-shadow 0.1s;
+            transition: transform 0.2s, opacity 0.2s;
         }
-        button:hover {
+
+        .primary-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+            opacity: 0.9;
         }
-        button:active {
-            transform: translateY(1px);
+
+        .secondary-btn {
+            background-color: transparent;
+            color: var(--text-main);
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        .valuation {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #888;
+
+        .secondary-btn:hover {
+            background: #f9fafb;
         }
+
+        /* Fade Animation */
+        .fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Rejection Hearts Animation */
+        .rejection-heart {
+            position: absolute;
+            font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+            color: #ff69b4; /* Hot Pink */
+            font-size: 1.2rem;
+            pointer-events: none;
+            user-select: none;
+            z-index: 20;
+            opacity: 0;
+            animation: floatAway 2.5s ease-out forwards;
+        }
+
+        @keyframes floatAway {
+            0% { 
+                opacity: 1; 
+                transform: translate(0, 0) scale(0.5); 
+            }
+            10% {
+                transform: translate(0, 0) scale(1.2);
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(var(--tx), var(--ty)) scale(1); 
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -276,39 +368,143 @@
   });
 </script>
 
-    <div class="container">
-        <h1>Startup Generator</h1>
-        <div class="pitch" id="pitch">
-            Click below to disrupt an industry.
-        </div>
-        <button onclick="generate()">Pivot</button>
-        <div class="valuation" id="valuation"></div>
+
+    <div class="blob"></div>
+
+    <div class="badge">Series B • $40M Raised</div>
+
+    <h1 id="name" class="logo-name">Glorbo</h1>
+    <p id="vision" class="tagline">Redefining attention through ambient trust.</p>
+
+    <div class="btn-group">
+        <button class="primary-btn" onclick="generateStartup()">Generate Vision</button>
+        <button class="secondary-btn" onclick="rejectAccess(event)">Request Access</button>
     </div>
+
     <script>
-        const subjects = ["Uber", "Airbnb", "Tinder", "Spotify", "Netflix", "TikTok", "Zoom", "ChatGPT", "Bitcoin"];
-        const audiences = ["dogs", "grandmas", "babies", "gamers", "plants", "influencers", "introverts", "robots", "ghosts"];
-        const technologies = ["on the blockchain", "powered by AI", "in the metaverse", "using quantum computing", "with zero emissions", "subscription-based", "but decentralized"];
-        const buzzwords = ["synergy", "disruption", "paradigm shift", "growth hacking", "hyper-local", "scalable", "agile"];
+        // Data Arrays for maximum disruption
+        const prefixes = [
+            "Glo", "Vun", "Ska", "Omni", "Qua", "Zen", "Nex", "Aero", "Lumi", "Syn", 
+            "Tru", "Veri", "Kine", "Sol", "Flux", "Oura", "Praxis", "Vel", "Zym"
+        ];
+        
+        const suffixes = [
+            "rbo", "ly", "ify", "os", "io", "ia", "ex", "on", "flow", "base", 
+            "node", "grid", "pulse", "minds", "labs", "scale", "loop", "sync"
+        ];
 
-        function generate() {
-            const subject = subjects[Math.floor(Math.random() * subjects.length)];
-            const audience = audiences[Math.floor(Math.random() * audiences.length)];
-            const tech = technologies[Math.floor(Math.random() * technologies.length)];
+        const verbs = [
+            "Redefining", "Disrupting", "Democratizing", "Leveraging", "Unlocking", 
+            "Accelerating", "Reimagining", "Optimizing", "Humanizing", "Synthesizing", 
+            "Decentralizing", "Gamifying", "Orchestrating"
+        ];
+
+        const nouns1 = [
+            "attention", "friction", "enterprise velocity", "creative bandwidth", 
+            "cognitive load", "digital wellness", "ambient data", "radical transparency", 
+            "human capital", "asynchronous synergy", "workflow entropy", "cloud sovereignty"
+        ];
+
+        const connectors = [
+            "through", "via", "using", "by leveraging", "with", "for", "powered by"
+        ];
+
+        const adjs = [
+            "ambient", "hyper-local", "AI-driven", "quantum", "frictionless", 
+            "holistic", "granular", "predictive", "serverless", "bespoke", 
+            "autonomous", "generative", "curated", "non-fungible"
+        ];
+
+        const nouns2 = [
+            "trust", "ecosystems", "outcomes", "scaling", "infrastructure", 
+            "empathy", "consensus", "liquidity", "neural networks", "collaboration", 
+            "storytelling", "presence", "verticals"
+        ];
+
+        const badges = [
+            "Stealth Mode", "Series A • $12M", "Pre-Seed • YC W24", "Series B • $40M", 
+            "Acquired by Google", "#1 on Product Hunt", "Invite Only"
+        ];
+
+        function generateName() {
+            // 50% chance of simple combo, 30% chance of just a random word + "labs", 20% chance of dropping vowels
+            const r = Math.random();
+            const pre = prefixes[Math.floor(Math.random() * prefixes.length)];
+            const suf = suffixes[Math.floor(Math.random() * suffixes.length)];
             
-            const pitchDiv = document.getElementById('pitch');
-            const valDiv = document.getElementById('valuation');
+            let name = pre + suf;
+            if (r > 0.8) name = pre + "a"; 
+            
+            return name;
+        }
 
-            const templates = [
-                \`It's like <span class="highlight">\${subject}</span> for <span class="highlight">\${audience}</span>.\`,
-                \`<span class="highlight">\${subject}</span>, but <span class="highlight">\${tech}</span>.\`,
-                \`We are disrupting the <span class="highlight">\${audience}</span> industry with <span class="highlight">\${tech}</span>.\`
-            ];
+        function generateVision() {
+            const v = verbs[Math.floor(Math.random() * verbs.length)];
+            const n1 = nouns1[Math.floor(Math.random() * nouns1.length)];
+            const c = connectors[Math.floor(Math.random() * connectors.length)];
+            const a = adjs[Math.floor(Math.random() * adjs.length)];
+            const n2 = nouns2[Math.floor(Math.random() * nouns2.length)];
 
-            const template = templates[Math.floor(Math.random() * templates.length)];
-            pitchDiv.innerHTML = template;
+            return `${v} ${n1} ${c} ${a} ${n2}.`;
+        }
 
-            const valuation = (Math.random() * 900 + 10).toFixed(1);
-            valDiv.innerText = \`Pre-seed valuation: \$\${valuation} Million\`;
+        function generateStartup() {
+            const nameEl = document.getElementById('name');
+            const visionEl = document.getElementById('vision');
+            const badgeEl = document.querySelector('.badge');
+
+            // Reset Animation
+            nameEl.classList.remove('fade-in');
+            visionEl.classList.remove('fade-in');
+            void nameEl.offsetWidth; // Trigger reflow
+
+            // Set Content
+            nameEl.innerText = generateName();
+            visionEl.innerText = generateVision();
+            badgeEl.innerText = badges[Math.floor(Math.random() * badges.length)];
+
+            // Add Animation
+            nameEl.classList.add('fade-in');
+            visionEl.classList.add('fade-in');
+        }
+
+        function rejectAccess(e) {
+            const count = 30;
+            const body = document.body;
+            
+            // Get click position for origin, fallback to center if needed
+            const originX = e.clientX || window.innerWidth / 2;
+            const originY = e.clientY || window.innerHeight / 2;
+
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.classList.add('rejection-heart');
+                el.innerText = "no 💖";
+                
+                // Start near the button but slightly randomized
+                const startX = originX + (Math.random() * 100 - 50);
+                const startY = originY + (Math.random() * 50 - 25);
+                
+                el.style.left = startX + 'px';
+                el.style.top = startY + 'px';
+
+                // Random travel direction (spread out)
+                const travelX = (Math.random() * 600 - 300) + 'px';
+                const travelY = (Math.random() * 600 - 300) + 'px';
+                
+                el.style.setProperty('--tx', travelX);
+                el.style.setProperty('--ty', travelY);
+
+                // Random delay so they don't all leave at once
+                el.style.animationDelay = (Math.random() * 0.5) + 's';
+
+                body.appendChild(el);
+
+                // Cleanup
+                setTimeout(() => {
+                    el.remove();
+                }, 3000);
+            }
         }
     </script>
 </body>

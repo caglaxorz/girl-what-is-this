@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -563,8 +562,7 @@
 
             // 4. Update Stats
             tasksIgnored++;
-            // Fix: escape template literal for TS
-            document.getElementById('status-msg').innerText = \`tasks ignored: \${tasksIgnored}\`;
+            document.getElementById('status-msg').innerText = `tasks ignored: ${tasksIgnored}`;
 
             // 5. Cleanup DOM
             setTimeout(() => {
