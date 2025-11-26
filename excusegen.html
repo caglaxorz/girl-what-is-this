@@ -102,45 +102,47 @@
 <style>
   .menu-bar-container {
     position: fixed;
-    top: 4px;
-    right: 4px;
+    top: 6px;
+    right: 6px;
     z-index: 10000;
-    font-family: 'Comic Neue', cursive;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive;
+    color: #4a0072; /* dark purple */
   }
 
   .menu-button {
-    background-color: white;
-    border: 2px solid black;
-    box-shadow: 4px 4px 0px 0px rgba(255, 105, 180, 1);
+    background-color: #fff;
+    border: 2px solid #4a0072;
+    box-shadow: 4px 4px 0px 0px rgba(74, 0, 114, 0.15);
     padding: 8px 16px;
     font-weight: bold;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s;
     border-radius: 0;
+    color: #4a0072;
   }
 
   .menu-button:hover {
     transform: translateY(-2px);
-    box-shadow: 4px 6px 0px 0px rgba(255, 105, 180, 1);
+    box-shadow: 4px 6px 0px 0px rgba(74, 0, 114, 0.18);
   }
 
   .menu-button:active {
-    background-color: #ffb6d9;
-    transform: translateY(2px);
-    box-shadow: 2px 2px 0px 0px rgba(255, 105, 180, 1);
+    background-color: #f7e6fb;
+    transform: translateY(1px);
+    box-shadow: 2px 2px 0px 0px rgba(74, 0, 114, 0.12);
   }
 
   .menu-dropdown {
     position: absolute;
     top: 56px;
     right: 0;
-    width: 256px;
-    background-color: #ffe4f0;
-    border: 4px double #dde0ff;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    padding: 16px;
-    max-height: 80vh;
+    width: 280px;
+    background-color: #fff4fb;
+    border: 3px double #f0e6ff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    padding: 12px;
+    max-height: 72vh;
     overflow-y: auto;
     display: none;
   }
@@ -152,10 +154,10 @@
   .menu-title {
     text-align: center;
     font-weight: bold;
-    border-bottom: 2px dashed #ff99d0;
+    border-bottom: 2px dashed #e6d0f0;
     padding-bottom: 8px;
     margin-bottom: 8px;
-    color: #c71585;
+    color: #4a0072;
   }
 
   .menu-list {
@@ -164,7 +166,7 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .menu-item {
@@ -173,38 +175,29 @@
 
   .menu-link {
     display: block;
-    padding: 4px;
+    padding: 6px 4px;
     border: 1px solid transparent;
     cursor: pointer;
     text-decoration: none;
-    color: inherit;
-    transition: all 0.2s;
+    color: #4a0072;
+    transition: all 0.12s;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive;
   }
 
   .menu-link:hover {
-    background-color: white;
-    border: 1px solid #ffb6d9;
+    background-color: #fff;
+    border: 1px solid #f0c6eb;
   }
 
   .menu-emoji {
     display: inline-block;
     margin-right: 8px;
-    animation: hover-spin;
-  }
-
-  .menu-link:hover .menu-emoji {
-    animation: spin 0.6s linear;
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
   }
 
   .menu-title-text {
     text-decoration: underline;
     text-decoration-style: wavy;
-    text-decoration-color: #4a90e2;
+    text-decoration-color: #4a0072;
   }
 
   /* Scrollbar styling */
@@ -213,16 +206,16 @@
   }
 
   .menu-dropdown::-webkit-scrollbar-track {
-    background: #fff0f5;
+    background: #fff4fb;
   }
 
   .menu-dropdown::-webkit-scrollbar-thumb {
-    background: #ffb6d9;
+    background: #d8a3e0;
     border-radius: 4px;
   }
 
   .menu-dropdown::-webkit-scrollbar-thumb:hover {
-    background: #ff99d0;
+    background: #c985d6;
   }
 </style>
 
@@ -235,19 +228,31 @@
 </div>
 
 <script>
-  // Menu data
+  // Menu data — ensure URLs match current filenames in repo
   const projects = [
     { title: 'Husband Finder', url: '/husband-finder.html', emoji: '💍' },
-    { title: 'Manifest Fan Club', url: '/hangi-manifest.html', emoji: '🔮' },
+    { title: 'Manifest Fan Club', url: '/hangimanifest.html', emoji: '🔮' },
     { title: 'Particularly', url: '/particularly.html', emoji: '✨' },
     { title: 'Page in a Page', url: '/page-in-page.html', emoji: '🕸️' },
     { title: 'Which 2003 Lyric Are U?', url: '/2003lyrics.html', emoji: '🎤' },
-    { title: '✨Anket Defteri✨', url: '/anket-defteri.html', emoji: '📔' },
+    { title: '✨Anket Defteri✨', url: '/anketdefteri.html', emoji: '📔' },
     { title: 'Betrayal Calculator', url: '/oneofyou.html', emoji: '🐍' },
     { title: 'What Color is the Flag?', url: '/redflag.html', emoji: '🚩' },
     { title: 'ÇBS Simulator', url: '/thecrunch.html', emoji: '📈' },
     { title: 'Anti-Productivity App', url: '/thevoid.html', emoji: '🕳️' },
     { title: 'ÇBS Paint', url: '/mspaint.html', emoji: '🎨' },
+    { title: 'Catch the Frog', url: '/thefrog.html', emoji: '🐸' },
+    { title: 'Follow the White Rabbit', url: '/rabbit.html', emoji: '🐇' },
+    { title: 'The Prophecy', url: '/theorb.html', emoji: '🔮' },
+    { title: 'Scream into the Void', url: '/scream.html', emoji: '😱' },
+    { title: 'Ice Ice Baby', url: '/icecube.html', emoji: '🧊' },
+    { title: 'Excuse Generator', url: '/excusegen.html', emoji: '🤥' },
+    { title: 'The Sorting Ceremony', url: '/hogwarts.html', emoji: '🎩' },
+    { title: 'Past Life Registry', url: '/pastliferegistry.html', emoji: '📜' },
+    { title: 'Startup Generator', url: '/startupgen.html', emoji: '🚀' },
+    { title: 'Is It Tuesday?', url: '/tuesday.html', emoji: '📅' },
+    { title: '00s Webpage', url: '/00swebpage.html', emoji: '🕹️' },
+  ];
     { title: 'Catch the Frog', url: '/thefrog.html', emoji: '🐸' },
     { title: 'Follow the White Rabbit', url: '/rabbit.html', emoji: '🐇' },
     { title: 'The Prophecy', url: '/theorb.html', emoji: '🔮' },
@@ -299,6 +304,7 @@
     }
   });
 </script>
+
 
 
     <div class="container">
