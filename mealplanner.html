@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Meal Prep Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* Custom Scrollbar for textareas */
+        textarea::-webkit-scrollbar {
+            width: 6px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background-color: #e5e7eb;
+            border-radius: 20px;
+        }
+        textarea:focus::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+        }
+
+        .meal-card {
+            transition: all 0.2s ease;
+        }
+        .meal-card:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-color: #3b82f6;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+            body {
+                background: white;
+            }
+            textarea {
+                border: none;
+                resize: none;
+                height: auto;
+            }
+            .shadow-sm {
+                box-shadow: none !important;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 px-6 py-4 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="bg-green-500 text-white p-2 rounded-lg">
+                <i class="fas fa-carrot text-xl"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight text-gray-900">Weekly Prep</h1>
+        </div>
+        <div class="flex gap-3 no-print">
+            <button onclick="clearPlanner()" class="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                <i class="fas fa-trash-alt mr-2"></i>Clear All
+            </button>
+            <button onclick="window.print()" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                <i class="fas fa-print mr-2"></i>Print
+            </button>
+            <button onclick="toggleShoppingList()" class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm transition-colors">
+                <i class="fas fa-list-check mr-2"></i>Shopping List
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
+        
+        <!-- Planner Grid -->
+        <div class="flex-1 overflow-y-auto p-6" id="grid-container">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-8">
+                    
+                    <!-- Header Row (Hidden on mobile, visible on md) -->
+                    <div class="hidden md:block"></div> <!-- Empty top-left corner -->
+                    <div class="hidden md:flex items-center justify-center font-semibold text-gray-500 bg-gray-50 rounded-lg py-2">Monday</div>
+                    <div class="hidden md:flex items-center justify-center font-semibold text-gray-500 bg-gray-50 rounded-lg py-2">Tuesday</div>
+                    <div class="hidden md:flex items-center justify-center font-semibold text-gray-500 bg-gray-50 rounded-lg py-2">Wednesday</div>
+                    <div class="hidden md:flex items-center justify-center font-semibold text-gray-500 bg-gray-50 rounded-lg py-2">Thursday</div>
+                    <div class="hidden md:flex items-center justify-center font-semibold text-gray-500 bg-gray-50 rounded-lg py-2">Friday</div>
+                    <div class="hidden md:flex items-center justify-center font-semibold text-gray-500 bg-gray-50 rounded-lg py-2">Saturday</div>
+                    <div class="hidden md:flex items-center justify-center font-semibold text-gray-500 bg-gray-50 rounded-lg py-2">Sunday</div>
+
+                    <!-- Generated Rows -->
+                    <div id="planner-grid" class="contents">
+                        <!-- JS will inject rows here -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Sliding Shopping List Panel -->
+        <div id="shopping-panel" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col border-l border-gray-200">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-shopping-basket text-green-600"></i> Shopping List
+                </h2>
+                <button onclick="toggleShoppingList()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-4 bg-blue-50 text-blue-700 text-xs border-b border-blue-100">
+                <i class="fas fa-info-circle mr-1"></i> 
+                Items are automatically extracted from your meal plan. Add ingredients separated by commas for best results.
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5">
+                <div id="shopping-list-items" class="space-y-3">
+                    <!-- Items go here -->
+                </div>
+                
+                <div id="empty-state" class="text-center text-gray-400 mt-10 hidden">
+                    <i class="fas fa-leaf text-4xl mb-3 opacity-50"></i>
+                    <p>Your planner is empty.</p>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-100 bg-gray-50">
+                <button onclick="copyShoppingList()" class="w-full py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+                    <i class="far fa-copy mr-2"></i>Copy to Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for mobile when panel is open -->
+    <div id="overlay" onclick="toggleShoppingList()" class="fixed inset-0 bg-black bg-opacity-25 z-40 hidden transition-opacity"></div>
+
+    <script>
+        const meals = [
+            { id: 'breakfast', label: 'Breakfast', icon: 'fa-coffee', color: 'text-orange-500' },
+            { id: 'lunch', label: 'Lunch', icon: 'fa-hamburger', color: 'text-green-500' },
+            { id: 'dinner', label: 'Dinner', icon: 'fa-utensils', color: 'text-blue-500' },
+            { id: 'snack', label: 'Snacks', icon: 'fa-apple-alt', color: 'text-purple-500' }
+        ];
+
+        const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        const grid = document.getElementById('planner-grid');
+
+        // Initialize Grid
+        function initGrid() {
+            grid.innerHTML = '';
+            
+            meals.forEach(meal => {
+                // Row Header (Meal Type)
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'flex md:flex-col items-center justify-center md:justify-start p-3 bg-white rounded-lg border border-gray-200 shadow-sm md:border-0 md:shadow-none md:bg-transparent col-span-1 md:h-32';
+                headerDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center mb-0 md:mb-2 mr-3 md:mr-0 border border-gray-100">
+                        <i class="fas ${meal.icon} ${meal.color}"></i>
+                    </div>
+                    <span class="font-bold text-gray-700 text-sm md:text-xs uppercase tracking-wide">${meal.label}</span>
+                `;
+                grid.appendChild(headerDiv);
+
+                // Day Cells
+                days.forEach((day, index) => {
+                    const cellId = `${day}-${meal.id}`;
+                    
+                    const cell = document.createElement('div');
+                    cell.className = 'meal-card bg-white rounded-lg border border-gray-200 p-2 shadow-sm h-32 flex flex-col group relative';
+                    
+                    // Mobile Day Label (only visible on small screens)
+                    const mobileLabel = `<span class="md:hidden text-xs font-bold text-gray-400 mb-1 uppercase">${dayLabels[index]}</span>`;
+                    
+                    cell.innerHTML = `
+                        ${mobileLabel}
+                        <textarea 
+                            id="${cellId}" 
+                            class="w-full h-full text-sm resize-none focus:outline-none bg-transparent placeholder-gray-300 leading-relaxed" 
+                            placeholder="Add meal..."
+                            oninput="saveData('${cellId}')"
+                        ></textarea>
+                        <div class="absolute bottom-1 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="fas fa-pen text-gray-300 text-xs"></i>
+                        </div>
+                    `;
+                    grid.appendChild(cell);
+                });
+            });
+
+            loadData();
+        }
+
+        // Save to LocalStorage
+        function saveData(id) {
+            const val = document.getElementById(id).value;
+            localStorage.setItem('mealPlan_' + id, val);
+            generateShoppingList(); // Update list in real time
+        }
+
+        // Load from LocalStorage
+        function loadData() {
+            days.forEach(day => {
+                meals.forEach(meal => {
+                    const id = `${day}-${meal.id}`;
+                    const saved = localStorage.getItem('mealPlan_' + id);
+                    if (saved) {
+                        document.getElementById(id).value = saved;
+                    }
+                });
+            });
+            generateShoppingList();
+        }
+
+        // Clear All Data
+        function clearPlanner() {
+            if(confirm('Are you sure you want to clear your entire meal plan?')) {
+                days.forEach(day => {
+                    meals.forEach(meal => {
+                        const id = `${day}-${meal.id}`;
+                        localStorage.removeItem('mealPlan_' + id);
+                        document.getElementById(id).value = '';
+                    });
+                });
+                generateShoppingList();
+            }
+        }
+
+        // Shopping List Logic
+        function generateShoppingList() {
+            const listContainer = document.getElementById('shopping-list-items');
+            const emptyState = document.getElementById('empty-state');
+            const items = new Set();
+            let hasContent = false;
+
+            days.forEach(day => {
+                meals.forEach(meal => {
+                    const id = `${day}-${meal.id}`;
+                    const val = document.getElementById(id).value;
+                    if (val.trim()) {
+                        hasContent = true;
+                        // Split by commas or new lines to get ingredients
+                        const parts = val.split(/[,\n]/);
+                        parts.forEach(part => {
+                            const clean = part.trim();
+                            if(clean && clean.length > 1) {
+                                // Capitalize first letter
+                                items.add(clean.charAt(0).toUpperCase() + clean.slice(1));
+                            }
+                        });
+                    }
+                });
+            });
+
+            listContainer.innerHTML = '';
+            
+            if (!hasContent || items.size === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            // Sort and Display
+            Array.from(items).sort().forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'flex items-start p-2 hover:bg-gray-50 rounded cursor-pointer group';
+                row.onclick = () => row.querySelector('input').click();
+                row.innerHTML = `
+                    <input type="checkbox" class="mt-1 mr-3 h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500 cursor-pointer">
+                    <span class="text-sm text-gray-700 group-hover:text-gray-900 leading-snug">${item}</span>
+                `;
+                listContainer.appendChild(row);
+            });
+        }
+
+        // Toggle Shopping Panel
+        function toggleShoppingList() {
+            const panel = document.getElementById('shopping-panel');
+            const overlay = document.getElementById('overlay');
+            
+            if (panel.classList.contains('translate-x-full')) {
+                panel.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                generateShoppingList(); // Refresh on open
+            } else {
+                panel.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function copyShoppingList() {
+            const items = [];
+            document.querySelectorAll('#shopping-list-items span').forEach(span => {
+                items.push("- " + span.innerText);
+            });
+            
+            if(items.length === 0) return;
+
+            const text = "MY SHOPPING LIST:\n\n" + items.join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('button[onclick="copyShoppingList()"]');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+                btn.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('bg-green-50', 'text-green-700', 'border-green-200');
+                }, 2000);
+            });
+        }
+
+        // Initialize
+        initGrid();
+
+    </script>
+</body>
+</html>

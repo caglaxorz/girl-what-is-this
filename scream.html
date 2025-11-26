@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shout Into the Void (Beta)</title>
+    <style>
+        :root {
+            --font-main: 'Impact', 'Arial Black', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: black;
+            font-family: var(--font-main);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- BACKGROUND --- */
+        .bg-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://i.redd.it/x219hh4w95881.png') no-repeat center center fixed;
+            background-size: cover;
+            filter: brightness(0.6) contrast(1.2);
+            z-index: 1;
+        }
+
+        /* --- STATIC OVERLAY (Hidden initially) --- */
+        .static-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuODUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjMiLz48L3N2Zz4=');
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 3s ease-in;
+        }
+
+        /* --- UI CONTAINER --- */
+        .ui-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        input[type="text"] {
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid white;
+            color: white;
+            font-family: var(--font-main);
+            font-size: 2rem;
+            padding: 15px;
+            text-align: center;
+            width: 80%;
+            outline: none;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            transition: box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+        }
+
+        button {
+            background: white;
+            color: black;
+            border: none;
+            font-family: var(--font-main);
+            font-size: 1.5rem;
+            padding: 10px 40px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transform: skew(-10deg);
+            transition: transform 0.1s, background 0.1s;
+        }
+
+        button:active {
+            transform: skew(-10deg) scale(0.95);
+            background: #ddd;
+        }
+
+        /* --- SCREAM CONTAINER --- */
+        #void-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 4;
+        }
+
+        .echo {
+            position: absolute;
+            color: white;
+            font-family: var(--font-main);
+            text-transform: uppercase;
+            white-space: nowrap;
+            opacity: 0;
+            transform-origin: center;
+            animation: screamIn 0.2s forwards;
+            mix-blend-mode: overlay; /* Helps it blend chaotically */
+        }
+
+        /* The Main Scream (Centered) */
+        .echo.main {
+            font-size: 8rem;
+            opacity: 1;
+            mix-blend-mode: normal;
+            text-shadow: 5px 5px 0px rgba(0,0,0,0.5);
+            z-index: 6;
+        }
+
+        /* Animation States */
+        @keyframes screamIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: var(--final-opacity); }
+        }
+
+        /* Fading into static */
+        .echo.fading {
+            transition: opacity 2s ease-out, filter 2s ease-out, transform 4s linear;
+            opacity: 0;
+            filter: blur(10px) grayscale(100%);
+            transform: translate(-50%, -50%) scale(1.5); /* Dissipate outwards */
+        }
+
+        /* Helper for glitchy text */
+        .glitch-text {
+            position: relative;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="bg-layer"></div>
+    <div class="static-overlay" id="staticOverlay"></div>
+
+    <div class="ui-container">
+        <input type="text" id="userInput" placeholder="WHAT HURTS?" autocomplete="off">
+        <button onclick="scream()">SCREAM</button>
+    </div>
+
+    <div id="void-container"></div>
+
+    <script>
+        const voidContainer = document.getElementById('void-container');
+        const staticOverlay = document.getElementById('staticOverlay');
+        const input = document.getElementById('userInput');
+
+        function scream() {
+            const text = input.value.trim();
+            if (!text) return;
+
+            // 1. Clear previous screams
+            voidContainer.innerHTML = '';
+            staticOverlay.style.opacity = '0'; // Reset static
+            
+            // 2. Create the "Main" center scream
+            createEcho(text, true);
+
+            // 3. Create chaos echoes
+            const echoCount = 15; // Number of echoes
+            for (let i = 0; i < echoCount; i++) {
+                setTimeout(() => {
+                    createEcho(text, false);
+                }, Math.random() * 200); // Stagger them slightly
+            }
+
+            // 4. Trigger the fade into static after delay
+            setTimeout(() => {
+                const allEchoes = document.querySelectorAll('.echo');
+                allEchoes.forEach(el => el.classList.add('fading'));
+                staticOverlay.style.opacity = '0.3'; // Bring in static
+            }, 1500); // Scream lasts 1.5 seconds before fading
+
+            // 5. Cleanup DOM after everything is gone
+            setTimeout(() => {
+                staticOverlay.style.opacity = '0';
+                voidContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        function createEcho(text, isMain) {
+            const el = document.createElement('div');
+            el.innerText = text;
+            el.classList.add('echo');
+            
+            if (isMain) {
+                el.classList.add('main');
+                el.style.left = '50%';
+                el.style.top = '50%';
+                el.style.setProperty('--final-opacity', '1');
+            } else {
+                // Randomize properties
+                const randomX = Math.random() * 100;
+                const randomY = Math.random() * 100;
+                const randomSize = 2 + Math.random() * 6; // 2rem to 8rem
+                const randomRot = (Math.random() * 60) - 30; // -30deg to 30deg
+                const randomOpacity = 0.3 + Math.random() * 0.5;
+
+                el.style.left = randomX + '%';
+                el.style.top = randomY + '%';
+                el.style.fontSize = randomSize + 'rem';
+                el.style.transform = `translate(-50%, -50%) rotate(${randomRot}deg)`;
+                el.style.setProperty('--final-opacity', randomOpacity);
+                
+                // Random glitch color overlay (text shadow)
+                const rColor = Math.random() > 0.5 ? 'red' : 'blue';
+                el.style.textShadow = `${Math.random()*4-2}px ${Math.random()*4-2}px 0 ${rColor}`;
+            }
+
+            voidContainer.appendChild(el);
+        }
+
+        // Allow Enter key to scream
+        input.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                scream();
+            }
+        });
+    </script>
+</body>
+</html>

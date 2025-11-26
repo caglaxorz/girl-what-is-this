@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particularly</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* Glassmorphism Control Panel */
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 280px;
+            padding: 20px;
+            border-radius: 16px;
+            background: rgba(30, 30, 30, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            color: white;
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+
+        h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            color: #eee;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4ade80;
+            cursor: pointer;
+            transition: background .15s ease-in-out;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            margin-top: 10px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .stats {
+            margin-top: 15px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        /* Mobile adjustment */
+        @media (max-width: 600px) {
+            #controls {
+                width: calc(100% - 40px);
+                bottom: 20px;
+                top: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="simCanvas"></canvas>
+
+    <div id="controls">
+        <h2>Particularly</h2>
+        
+        <div class="control-group">
+            <label>Interaction Radius <span id="val-radius">80</span></label>
+            <input type="range" id="radius" min="20" max="200" value="80">
+        </div>
+
+        <div class="control-group">
+            <label>Friction (Viscosity) <span id="val-friction">0.90</span></label>
+            <input type="range" id="friction" min="0.10" max="0.99" step="0.01" value="0.90">
+        </div>
+
+        <div class="control-group">
+            <label>Force Strength <span id="val-force">10</span></label>
+            <input type="range" id="force" min="1" max="50" value="10">
+        </div>
+
+        <button id="btn-random">Randomize Rules</button>
+        <button id="btn-reset" style="background: rgba(255,255,255,0.1); margin-top: 8px;">Reset Particles</button>
+        
+        <div class="stats">
+            Particles: 1200 | FPS: <span id="fps">60</span>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuration ---
+        const PARTICLE_COUNT = 1200;
+        const COLORS = ['#ef4444', '#22c55e', '#3b82f6', '#eab308']; // Red, Green, Blue, Yellow
+        const GROUP_COUNT = 4;
+        
+        // --- State ---
+        let particles = [];
+        let ruleMatrix = []; // 2D array defining attraction/repulsion
+        let canvas, ctx;
+        let width, height;
+        
+        // Simulation Parameters
+        let params = {
+            radius: 80,
+            friction: 0.90,
+            forceBase: 10,
+            beta: 0.3 // Repulsion zone ratio
+        };
+
+        // --- Initialization ---
+        function init() {
+            canvas = document.getElementById('simCanvas');
+            ctx = canvas.getContext('2d', { alpha: false }); // Optimization: disable alpha channel for bg
+            
+            resize();
+            window.addEventListener('resize', resize);
+
+            initParticles();
+            randomizeRules();
+            
+            // Start Loop
+            requestAnimationFrame(loop);
+            
+            // Setup UI
+            setupUI();
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                // Determine group index (0 to 3)
+                const group = Math.floor(Math.random() * GROUP_COUNT);
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: 0,
+                    vy: 0,
+                    group: group,
+                    color: COLORS[group]
+                });
+            }
+        }
+
+        function randomizeRules() {
+            ruleMatrix = [];
+            for (let i = 0; i < GROUP_COUNT; i++) {
+                ruleMatrix[i] = [];
+                for (let j = 0; j < GROUP_COUNT; j++) {
+                    // Generate a random force between -1 (repel) and 1 (attract)
+                    ruleMatrix[i][j] = (Math.random() * 2 - 1);
+                }
+            }
+            console.log("Rules updated:", ruleMatrix);
+        }
+
+        // --- Physics Engine ---
+        // Optimization: Pre-allocating simpler variables to avoid GC
+        function update() {
+            const rMax = params.radius;
+            const rMaxSq = rMax * rMax;
+            const friction = params.friction;
+            const forceFactor = params.forceBase / 10; // Normalized force scalar
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                let p1 = particles[i];
+                let fx = 0;
+                let fy = 0;
+
+                for (let j = 0; j < PARTICLE_COUNT; j++) {
+                    if (i === j) continue;
+                    let p2 = particles[j];
+
+                    let dx = p2.x - p1.x;
+                    let dy = p2.y - p1.y;
+
+                    // Wrap-around logic (Toroidal space)
+                    if (dx > width * 0.5) dx -= width;
+                    if (dx < -width * 0.5) dx += width;
+                    if (dy > height * 0.5) dy -= height;
+                    if (dy < -height * 0.5) dy += height;
+
+                    const distSq = dx * dx + dy * dy;
+
+                    if (distSq > 0 && distSq < rMaxSq) {
+                        const dist = Math.sqrt(distSq);
+                        
+                        // F logic based on Primordial Particle Life:
+                        // 1. Calculate normalized distance 'q' (0 to 1)
+                        // 2. If q < beta: Repulse (Force = q/beta - 1)
+                        // 3. If q > beta: Apply Rule (Force = rule * func(q))
+                        
+                        const q = dist / rMax;
+                        let f = 0;
+
+                        if (q < params.beta) {
+                            // Close range repulsion (always negative)
+                            // Smoother repulsion: 
+                            f = q / params.beta - 1;
+                        } else {
+                            // Medium range interaction based on matrix
+                            // Peak function: goes from 0 to 1 to 0 between beta and 1
+                            const rule = ruleMatrix[p1.group][p2.group];
+                            
+                            // A simple linear falloff or a peak function? 
+                            // Standard Particle Life peak function:
+                            const mid = (1 + params.beta) / 2;
+                            const range = 1 - params.beta;
+                            
+                            // This creates a "sweet spot" at distance 'mid'
+                            f = rule * (1 - Math.abs(2 * q - 1 - params.beta) / range);
+                        }
+
+                        // Apply force
+                        fx += (dx / dist) * f * forceFactor;
+                        fy += (dy / dist) * f * forceFactor;
+                    }
+                }
+
+                // Update Velocity
+                p1.vx = (p1.vx + fx) * friction;
+                p1.vy = (p1.vy + fy) * friction;
+
+                // Update Position
+                p1.x += p1.vx;
+                p1.y += p1.vy;
+
+                // Screen Wrap
+                if (p1.x < 0) p1.x += width;
+                if (p1.x >= width) p1.x -= width;
+                if (p1.y < 0) p1.y += height;
+                if (p1.y >= height) p1.y -= height;
+            }
+        }
+
+        // --- Rendering ---
+        function draw() {
+            // Fade effect for trails (optional, but consumes performance. Let's do clear for crispness)
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, width, height);
+
+            // Batch drawing by color is slightly faster but complex for depth. 
+            // Simple iteration is fine for 1200 particles.
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                let p = particles[i];
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                // Drawing small squares is faster than circles (arc)
+                ctx.fillRect(p.x, p.y, 3, 3);
+            }
+        }
+
+        // --- FPS Counter & Loop ---
+        let lastTime = 0;
+        let frameCount = 0;
+        let lastFpsTime = 0;
+
+        function loop(timestamp) {
+            update();
+            draw();
+
+            // FPS Calculation
+            frameCount++;
+            if (timestamp - lastFpsTime >= 1000) {
+                document.getElementById('fps').innerText = frameCount;
+                frameCount = 0;
+                lastFpsTime = timestamp;
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        // --- UI Events ---
+        function setupUI() {
+            const radInput = document.getElementById('radius');
+            const fricInput = document.getElementById('friction');
+            const forceInput = document.getElementById('force');
+            
+            const radVal = document.getElementById('val-radius');
+            const fricVal = document.getElementById('val-friction');
+            const forceVal = document.getElementById('val-force');
+
+            radInput.addEventListener('input', (e) => {
+                params.radius = parseFloat(e.target.value);
+                radVal.innerText = params.radius;
+            });
+
+            fricInput.addEventListener('input', (e) => {
+                params.friction = parseFloat(e.target.value);
+                fricVal.innerText = params.friction;
+            });
+
+            forceInput.addEventListener('input', (e) => {
+                params.forceBase = parseFloat(e.target.value);
+                forceVal.innerText = params.forceBase;
+            });
+
+            document.getElementById('btn-random').addEventListener('click', randomizeRules);
+            document.getElementById('btn-reset').addEventListener('click', () => {
+                initParticles();
+                // Randomize slightly to break stuck clusters
+                randomizeRules(); 
+            });
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>

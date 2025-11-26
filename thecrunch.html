@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEO SIMULATOR: THE CRUNCH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #202020;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border: 4px solid #555;
+        }
+
+        canvas {
+            display: block;
+            background-color: #f0f0f0; /* Office Wall Color */
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            text-shadow: 2px 2px 0 #000;
+            pointer-events: none;
+        }
+
+        #start-screen, #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            background: #ffcc00;
+            border: 4px solid #fff;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b38f00;
+        }
+        button:active {
+            box-shadow: 0 0 0;
+            transform: translateY(4px);
+        }
+
+        .hidden { display: none !important; }
+        
+        h1 { font-size: 24px; line-height: 1.5; color: #ffcc00; margin-bottom: 10px;}
+        p { font-size: 12px; line-height: 1.5; color: #ccc; max-width: 80%; }
+        .red { color: #ff5555; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="450"></canvas>
+        
+        <div id="ui-layer">
+            <div>REVENUE: $<span id="score">0</span></div>
+            <div>BURNOUT: <span id="health">0</span>%</div>
+        </div>
+
+        <div id="start-screen">
+            <h1>CEO SIMULATOR:<br>THE CRUNCH</h1>
+            <p>You are ÇBS, the Founder.</p>
+            <p>Avoid <span class="red">REVISIONS</span> and <span class="red">EMAILS</span>.</p>
+            <p>Drink COFFEE to sprint.</p>
+            <p>Collect REVENUE.</p>
+            <p>ARROWS to Move & Jump.</p>
+            <button onclick="startGame()">START WORK DAY</button>
+        </div>
+
+        <div id="game-over-screen" class="hidden">
+            <h1 id="go-title">BANKRUPT</h1>
+            <p id="go-reason">You missed the deadline.</p>
+            <p>Final Revenue: $<span id="final-score">0</span></p>
+            <button onclick="resetGame()">TRY AGAIN</button>
+        </div>
+    </div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const healthEl = document.getElementById('health');
+    const startScreen = document.getElementById('start-screen');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const goTitle = document.getElementById('go-title');
+    const goReason = document.getElementById('go-reason');
+    const finalScoreEl = document.getElementById('final-score');
+
+    // Game Constants
+    const GRAVITY = 0.6;
+    const FRICTION = 0.8;
+    const JUMP_FORCE = 12;
+    const SPEED = 5;
+    
+    // Game State
+    let gameRunning = false;
+    let score = 0;
+    let burnout = 0; // 100 = dead
+    let frame = 0;
+    let cameraX = 0;
+
+    // Keys
+    const keys = {
+        right: false,
+        left: false,
+        up: false
+    };
+
+    // Entities
+    let player = {
+        x: 100, y: 100, width: 30, height: 40,
+        velX: 0, velY: 0,
+        grounded: false,
+        color: '#4a4a4a', // Dark Suit
+        facingRight: true
+    };
+
+    let platforms = [];
+    let enemies = [];
+    let items = [];
+    let decorations = []; // Background office stuff
+    let goal = { x: 0, y: 0, w: 40, h: 80 }; // The IPO Bell
+
+    const TILE_SIZE = 50;
+
+    function initLevel() {
+        platforms = [];
+        enemies = [];
+        items = [];
+        decorations = [];
+        
+        // Generate a longer floor
+        for(let i=0; i<100; i++) {
+             platforms.push({ x: i * TILE_SIZE, y: 400, w: TILE_SIZE, h: TILE_SIZE, type: 'floor' });
+        }
+
+        // Add some "Desks" (Platforms)
+        platforms.push({ x: 300, y: 300, w: 100, h: 20, type: 'desk' });
+        platforms.push({ x: 500, y: 250, w: 100, h: 20, type: 'desk' });
+        platforms.push({ x: 750, y: 300, w: 100, h: 20, type: 'desk' });
+        platforms.push({ x: 1000, y: 200, w: 150, h: 20, type: 'desk' });
+        platforms.push({ x: 1300, y: 300, w: 100, h: 20, type: 'desk' });
+        platforms.push({ x: 1600, y: 350, w: 100, h: 20, type: 'desk' });
+
+        // Add "Deadlines" (Spikes/Obstacles)
+        enemies.push({ x: 600, y: 360, w: 30, h: 40, type: 'deadline', velX: 0 }); // Static
+        enemies.push({ x: 1100, y: 160, w: 30, h: 40, type: 'deadline', velX: 0 });
+        enemies.push({ x: 1450, y: 360, w: 30, h: 40, type: 'deadline', velX: 0 });
+
+        // Add "Revisions" (Moving Enemies)
+        enemies.push({ x: 400, y: 360, w: 30, h: 30, type: 'revision', velX: -2, patrolStart: 300, patrolEnd: 500 });
+        enemies.push({ x: 800, y: 260, w: 30, h: 30, type: 'revision', velX: 2, patrolStart: 750, patrolEnd: 900 });
+        enemies.push({ x: 1800, y: 360, w: 30, h: 30, type: 'revision', velX: -3, patrolStart: 1600, patrolEnd: 2000 });
+
+        // Add Items
+        items.push({ x: 320, y: 260, w: 20, h: 20, type: 'coffee' });
+        items.push({ x: 520, y: 200, w: 20, h: 20, type: 'money' });
+        items.push({ x: 1050, y: 150, w: 20, h: 20, type: 'money' });
+        items.push({ x: 1320, y: 260, w: 20, h: 20, type: 'coffee' });
+        items.push({ x: 1620, y: 300, w: 20, h: 20, type: 'money' });
+
+        // Goal
+        goal = { x: 2200, y: 320, w: 40, h: 80 };
+
+        // Background Decor (Charts on walls)
+        for(let i=0; i<10; i++) {
+            decorations.push({ 
+                x: i * 400 + 100, 
+                y: 150, 
+                w: 60, 
+                h: 80, 
+                type: 'chart' 
+            });
+        }
+    }
+
+    function startGame() {
+        startScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        
+        player.x = 50;
+        player.y = 300;
+        player.velX = 0;
+        player.velY = 0;
+        score = 0;
+        burnout = 0;
+        gameRunning = true;
+        initLevel();
+        requestAnimationFrame(loop);
+    }
+
+    function resetGame() {
+        startGame();
+    }
+
+    function endGame(status, reason) {
+        gameRunning = false;
+        gameOverScreen.classList.remove('hidden');
+        finalScoreEl.innerText = score;
+        
+        if (status === 'win') {
+            goTitle.innerText = "IPO LAUNCHED!";
+            goTitle.style.color = "#00ff00";
+            goReason.innerText = "You survived the crunch. Investors are happy.";
+        } else {
+            goTitle.innerText = "FIRED";
+            goTitle.style.color = "#ff5555";
+            goReason.innerText = reason;
+        }
+    }
+
+    // Input Handling
+    window.addEventListener('keydown', function (e) {
+        if (e.code === 'ArrowRight') keys.right = true;
+        if (e.code === 'ArrowLeft') keys.left = true;
+        if (e.code === 'ArrowUp') {
+            if (player.grounded) {
+                player.velY = -JUMP_FORCE;
+                player.grounded = false;
+            }
+        }
+    });
+
+    window.addEventListener('keyup', function (e) {
+        if (e.code === 'ArrowRight') keys.right = false;
+        if (e.code === 'ArrowLeft') keys.left = false;
+    });
+
+    // Helper: Rectangle Collision
+    function checkCollision(rect1, rect2) {
+        return (rect1.x < rect2.x + rect2.w &&
+                rect1.x + rect1.width > rect2.x &&
+                rect1.y < rect2.y + rect2.h &&
+                rect1.y + rect1.height > rect2.y);
+    }
+
+    function update() {
+        if (!gameRunning) return;
+
+        // Player Movement
+        if (keys.right) {
+            if (player.velX < SPEED) player.velX++;
+            player.facingRight = true;
+        }
+        if (keys.left) {
+            if (player.velX > -SPEED) player.velX--;
+            player.facingRight = false;
+        }
+
+        player.velX *= FRICTION;
+        player.velY += GRAVITY;
+
+        player.x += player.velX;
+        player.y += player.velY;
+        player.grounded = false;
+
+        // Platform Collisions
+        for(let plat of platforms) {
+            if (player.x < plat.x + plat.w &&
+                player.x + player.width > plat.x &&
+                player.y < plat.y + plat.h &&
+                player.y + player.height > plat.y) {
+                
+                // Collision Direction Check
+                let vectorX = (player.x + (player.width/2)) - (plat.x + (plat.w/2));
+                let vectorY = (player.y + (player.height/2)) - (plat.y + (plat.h/2));
+                let hWidths = (player.width/2) + (plat.w/2);
+                let hHeights = (player.height/2) + (plat.h/2);
+
+                let colDir = null;
+
+                if (Math.abs(vectorX) < hWidths && Math.abs(vectorY) < hHeights) {
+                    let oX = hWidths - Math.abs(vectorX);
+                    let oY = hHeights - Math.abs(vectorY);
+
+                    if (oX >= oY) {
+                        if (vectorY > 0) {
+                            colDir = "t"; // Player hitting bottom of platform
+                            player.y += oY;
+                            player.velY = 0;
+                        } else {
+                            colDir = "b"; // Player standing on top
+                            player.y -= oY;
+                            player.velY = 0;
+                            player.grounded = true;
+                        }
+                    } else {
+                        if (vectorX > 0) {
+                            colDir = "l";
+                            player.x += oX;
+                            player.velX = 0;
+                        } else {
+                            colDir = "r";
+                            player.x -= oX;
+                            player.velX = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Enemy Logic
+        for (let i = 0; i < enemies.length; i++) {
+            let e = enemies[i];
+            
+            // Movement for Revisions
+            if (e.type === 'revision') {
+                e.x += e.velX;
+                if (e.x < e.patrolStart || e.x > e.patrolEnd) e.velX *= -1;
+            }
+
+            // Collision with Player
+            if (checkCollision(player, {x: e.x, y: e.y, w: e.w, h: e.h})) {
+                if (e.type === 'revision' && player.velY > 0 && player.y + player.height < e.y + e.h / 2) {
+                    // Jumped on head
+                    enemies.splice(i, 1);
+                    player.velY = -JUMP_FORCE / 1.5;
+                    score += 500;
+                    i--;
+                } else {
+                    // Hit enemy
+                    endGame('loss', 'You were overwhelmed by ' + (e.type === 'deadline' ? 'a deadline.' : 'revisions.'));
+                    return;
+                }
+            }
+        }
+
+        // Item Logic
+        for (let i = 0; i < items.length; i++) {
+            let item = items[i];
+            if (checkCollision(player, {x: item.x, y: item.y, w: item.w, h: item.h})) {
+                if (item.type === 'money') {
+                    score += 1000;
+                } else if (item.type === 'coffee') {
+                    score += 100;
+                    // Speed boost logic could go here
+                }
+                items.splice(i, 1);
+                i--;
+            }
+        }
+
+        // Goal Logic
+        if (checkCollision(player, goal)) {
+            endGame('win');
+            return;
+        }
+
+        // Pitfall logic
+        if (player.y > canvas.height) {
+            endGame('loss', 'You fell out of the market.');
+            return;
+        }
+
+        // Camera
+        cameraX = player.x - 100;
+
+        // UI Update
+        scoreEl.innerText = score;
+        burnout = Math.min(100, burnout + 0.05); // Slowly increase burnout
+        healthEl.innerText = Math.floor(burnout);
+        if(burnout >= 100) {
+            endGame('loss', 'Burnout reached 100%.');
+        }
+    }
+
+    function draw() {
+        // Clear
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Save context for camera translation
+        ctx.save();
+        ctx.translate(-cameraX, 0);
+
+        // Draw Background Items
+        for(let d of decorations) {
+            ctx.fillStyle = '#d0d0d0';
+            ctx.fillRect(d.x, d.y, d.w, d.h);
+            // Draw chart lines
+            ctx.strokeStyle = '#ff5555';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(d.x + 5, d.y + d.h - 5);
+            ctx.lineTo(d.x + d.w/2, d.y + d.h/2);
+            ctx.lineTo(d.x + d.w - 5, d.y + 10);
+            ctx.stroke();
+        }
+
+        // Draw Platforms
+        ctx.fillStyle = '#666';
+        for(let p of platforms) {
+            if (p.type === 'desk') {
+                ctx.fillStyle = '#8B4513'; // Wood color
+                ctx.fillRect(p.x, p.y, p.w, 5); // Desk top
+                ctx.fillStyle = '#666'; // Legs
+                ctx.fillRect(p.x + 10, p.y+5, 5, p.h); 
+                ctx.fillRect(p.x + p.w - 15, p.y+5, 5, p.h); 
+            } else {
+                ctx.fillStyle = '#444';
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+            }
+        }
+
+        // Draw Goal (IPO Bell/Flag)
+        ctx.fillStyle = '#FFD700';
+        ctx.fillRect(goal.x, goal.y, 5, 80); // Pole
+        ctx.fillRect(goal.x, goal.y, 40, 30); // Flag
+        ctx.fillStyle = '#000';
+        ctx.fillText("IPO", goal.x + 5, goal.y + 20);
+
+        // Draw Enemies
+        for(let e of enemies) {
+            if (e.type === 'deadline') {
+                // Red Spikes
+                ctx.fillStyle = '#ff0000';
+                ctx.beginPath();
+                ctx.moveTo(e.x, e.y + e.h);
+                ctx.lineTo(e.x + e.w/2, e.y);
+                ctx.lineTo(e.x + e.w, e.y + e.h);
+                ctx.fill();
+            } else {
+                // Moving Paper Stack (Ghost)
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(e.x, e.y, e.w, e.h);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(e.x + 5, e.y + 10, 5, 5); // Eye
+                ctx.fillRect(e.x + 20, e.y + 10, 5, 5); // Eye
+            }
+        }
+
+        // Draw Items
+        for(let item of items) {
+            if (item.type === 'money') {
+                ctx.fillStyle = '#85bb65';
+                ctx.beginPath();
+                ctx.arc(item.x + item.w/2, item.y + item.h/2, 10, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.fillText("$", item.x + 6, item.y + 15);
+            } else {
+                // Coffee Mug
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(item.x, item.y + 5, 15, 15);
+                ctx.fillStyle = '#6f4e37';
+                ctx.fillRect(item.x+2, item.y + 5, 11, 4);
+            }
+        }
+
+        // Draw Player (Girl CEO ÇBS)
+        const pDrawX = player.x;
+        const pDrawY = player.y;
+
+        // 1. Hair (Back) - "Blondeish Brunette" (Golden/Brown)
+        ctx.fillStyle = '#C5A059'; 
+        if (player.facingRight) {
+             ctx.fillRect(pDrawX - 4, pDrawY + 5, 10, 25); // Long hair back
+        } else {
+             ctx.fillRect(pDrawX + player.width - 6, pDrawY + 5, 10, 25);
+        }
+
+        // 2. Body (Suit)
+        ctx.fillStyle = '#333'; // Dark grey suit
+        ctx.fillRect(pDrawX, pDrawY + 12, player.width, player.height - 12);
+        
+        // Shirt/Blouse
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(pDrawX + 10, pDrawY + 12, 10, 28);
+
+        // 3. Head (Skin)
+        ctx.fillStyle = '#ffccaa';
+        ctx.fillRect(pDrawX + 4, pDrawY - 5, 22, 17);
+
+        // 4. Hair (Top/Front)
+        ctx.fillStyle = '#C5A059'; 
+        ctx.fillRect(pDrawX + 2, pDrawY - 8, 26, 6); // Top
+        // Bangs/Side
+        if (player.facingRight) {
+            ctx.fillRect(pDrawX + 18, pDrawY - 2, 4, 10);
+        } else {
+            ctx.fillRect(pDrawX + 8, pDrawY - 2, 4, 10);
+        }
+
+        // 5. Name Label "ÇBS"
+        ctx.fillStyle = '#ffcc00'; // Gold text
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = "center";
+        ctx.fillText("ÇBS", pDrawX + player.width/2, pDrawY - 15);
+        ctx.textAlign = "left"; // Reset
+
+        ctx.restore();
+    }
+
+    function loop() {
+        if (!gameRunning) return;
+        update();
+        draw();
+        frame++;
+        requestAnimationFrame(loop);
+    }
+
+</script>
+</body>
+</html>

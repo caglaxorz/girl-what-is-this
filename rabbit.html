@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>follow the white rabbit</title>
+    <style>
+        :root {
+            --phosphor-main: #00ff00; /* Classic Terminal Green */
+            --phosphor-glow: #008f11;
+            --bg-color: #0d0d0d;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--phosphor-main);
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        /* --- CRT SCREEN EFFECTS --- */
+        .crt-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Scanlines */
+        .scanlines {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        /* Subtle Flicker */
+        .flicker {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 0, 0.02);
+            opacity: 0;
+            position: absolute;
+            top: 0; left: 0;
+            animation: flickerAnim 0.15s infinite;
+            pointer-events: none;
+        }
+
+        /* Vignette */
+        .vignette {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        @keyframes flickerAnim {
+            0% { opacity: 0.02; }
+            5% { opacity: 0.05; }
+            10% { opacity: 0.01; }
+            15% { opacity: 0.06; }
+            30% { opacity: 0.02; }
+            60% { opacity: 0.04; }
+            100% { opacity: 0.02; }
+        }
+
+        /* --- THE RABBIT --- */
+        #rabbit-container {
+            cursor: pointer;
+            transition: opacity 0.2s;
+            z-index: 5;
+            animation: pulse 3s infinite ease-in-out;
+        }
+
+        .rabbit-emoji {
+            font-size: 120px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(255,255,255,0.6)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
+        }
+
+        /* --- THE TERMINAL --- */
+        #terminal-container {
+            display: none; /* Hidden initially */
+            position: absolute;
+            top: 20%;
+            left: 10%;
+            width: 80%;
+            font-size: 1.5rem;
+            line-height: 1.8;
+            text-shadow: 0 0 5px var(--phosphor-glow), 0 0 10px var(--phosphor-glow);
+            z-index: 5;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: var(--phosphor-main);
+            vertical-align: bottom;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .line {
+            display: block;
+            margin-bottom: 20px;
+            min-height: 1.5rem; /* Reserve space */
+        }
+
+        /* Glitch text effect class */
+        .glitch {
+            animation: glitch-skew 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+            color: var(--phosphor-main);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- CRT Overlay Effects -->
+    <div class="crt-container">
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+        <div class="flicker"></div>
+    </div>
+
+    <!-- Phase 1: The Rabbit -->
+    <div id="rabbit-container" onclick="enterTheMatrix()">
+        <div class="rabbit-emoji">🐇</div>
+    </div>
+
+    <!-- Phase 2: The Terminal -->
+    <div id="terminal-container">
+        <span class="line" id="line1"></span>
+        <span class="line" id="line2"></span>
+        <span class="line" id="line3"></span>
+        <span class="cursor"></span>
+    </div>
+
+    <script>
+        const rabbit = document.getElementById('rabbit-container');
+        const terminal = document.getElementById('terminal-container');
+        
+        // The script to type out
+        const script = [
+            "this page looks familiar",
+            "you were here on march 14 2004",
+            "you clicked the rabbit back then too"
+        ];
+
+        // Typing Configuration
+        const typingSpeed = 70; // ms per char
+        const lineDelay = 1500; // ms between lines
+
+        function enterTheMatrix() {
+            // 1. Hide Rabbit
+            rabbit.style.display = 'none';
+            
+            // 2. Show Terminal
+            terminal.style.display = 'block';
+
+            // 3. Start Typing Sequence
+            typeLine(0);
+        }
+
+        function typeLine(lineIndex) {
+            if (lineIndex >= script.length) return; // Done
+
+            const currentLineId = 'line' + (lineIndex + 1);
+            const lineElement = document.getElementById(currentLineId);
+            const textToType = script[lineIndex];
+            
+            let charIndex = 0;
+
+            function typeChar() {
+                if (charIndex < textToType.length) {
+                    lineElement.innerHTML += textToType.charAt(charIndex);
+                    charIndex++;
+                    
+                    // Add random jitter to typing speed for realism
+                    const randomJitter = Math.floor(Math.random() * 50); 
+                    setTimeout(typeChar, typingSpeed + randomJitter);
+                } else {
+                    // Line finished, move cursor visual (optional, here cursor stays at bottom)
+                    // Move to next line after delay
+                    setTimeout(() => {
+                        typeLine(lineIndex + 1);
+                    }, lineDelay);
+                }
+            }
+
+            typeChar();
+        }
+    </script>
+</body>
+</html>

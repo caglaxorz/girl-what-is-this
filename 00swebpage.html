@@ -1,0 +1,288 @@
+"<!DOCTYPE html>
+<html>
+<head>
+    <title>~*~ ÇAĞLA'S WORLD ~*~</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            background-color: #000000;
+            background-image: url('https://media.giphy.com/media/U3qYN8S0j3bpK/giphy.gif'); /* Starry background */
+            color: #FFFF00;
+            font-family: "Comic Sans MS", "Chalkboard SE", sans-serif;
+            margin: 0;
+            padding: 0;
+            cursor: url('https://cur.cursors-4u.net/cursors/cur-2/cur116.cur'), auto; /* Custom Cursor */
+        }
+
+        /* Standard Link Styles */
+        a:link { color: #00FFFF; text-decoration: none; }
+        a:visited { color: #FF00FF; text-decoration: none; }
+        a:hover { 
+            color: #FFFFFF; 
+            text-decoration: underline; 
+            background-color: blue;
+            cursor: help;
+        }
+        a:active { color: #FF0000; }
+
+        /* The Main Container Table */
+        .main-table {
+            width: 800px;
+            background-color: #000033;
+            border: 5px ridge #3366FF;
+            margin: 0 auto;
+        }
+
+        /* Header Style */
+        .header-box {
+            text-align: center;
+            background-color: #000000;
+            border: 3px solid #FF00FF;
+            margin: 10px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: #FF00FF;
+            text-shadow: 2px 2px #00FFFF;
+            margin: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            vertical-align: top;
+            width: 150px;
+            background-color: #000066;
+            padding: 10px;
+            border-right: 3px ridge #3366FF;
+            text-align: center;
+        }
+
+        /* Content Area */
+        .content {
+            vertical-align: top;
+            padding: 20px;
+        }
+
+        /* Retro UI Elements */
+        .blink {
+            animation: blinker 1s linear infinite;
+            color: red;
+            font-weight: bold;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        .marquee-container {
+            background-color: #000000;
+            border: 1px solid #FFFFFF;
+            color: #00FF00;
+            font-family: "Courier New", monospace;
+            padding: 2px;
+            margin-bottom: 20px;
+        }
+
+        .divider {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+            margin: 20px 0;
+        }
+
+        /* Fake Win95 Window */
+        .win95-box {
+            background: #c0c0c0;
+            border: 2px solid #dfdfdf;
+            border-bottom-color: #000;
+            border-right-color: #000;
+            padding: 2px;
+            width: 200px;
+            margin: 20px auto;
+            color: black;
+            font-family: 'MS Sans Serif', sans-serif;
+            text-align: left;
+        }
+        .win95-title {
+            background: #000080;
+            color: white;
+            padding: 2px 5px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .win95-content {
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        /* Snowflakes */
+        .snowflake {
+            position: fixed;
+            color: #FFF;
+            font-size: 1.5em;
+            font-family: Arial, sans-serif;
+            text-shadow: 0 0 5px #000;
+            pointer-events: none;
+            z-index: 9999;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh); }
+            100% { transform: translateY(110vh); }
+        }
+        
+        /* Cursor Trail Dot */
+        .trail-dot {
+            position: absolute;
+            height: 5px;
+            width: 5px;
+            background-color: cyan;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- JS for Snow and Cursor Trail -->
+<script>
+    // --- SNOW EFFECT ---
+    function createSnow() {
+        const snowflake = document.createElement('div');
+        snowflake.innerHTML = '❄';
+        snowflake.classList.add('snowflake');
+        snowflake.style.left = Math.random() * 100 + 'vw';
+        snowflake.style.animationDuration = Math.random() * 3 + 2 + 's'; 
+        snowflake.style.opacity = Math.random();
+        snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+        
+        document.body.appendChild(snowflake);
+        
+        setTimeout(() => {
+            snowflake.remove();
+        }, 5000);
+    }
+    setInterval(createSnow, 100);
+
+    // --- CURSOR TRAIL ---
+    document.addEventListener('mousemove', function(e) {
+        const dot = document.createElement('div');
+        dot.className = 'trail-dot';
+        dot.style.left = e.pageX + 'px';
+        dot.style.top = e.pageY + 'px';
+        document.body.appendChild(dot);
+
+        setTimeout(() => {
+            dot.remove();
+        }, 300); // Fades out quickly
+    });
+</script>
+
+<!-- Marquee at the very top -->
+<div class="marquee-container">
+    <marquee scrollamount="5" scrolldelay="100">
+        +++ WELCOME TO ÇAĞLA'S HOMEPAGE +++ DON'T FORGET TO SIGN THE GUESTBOOK +++ BEST VIEWED IN NETSCAPE NAVIGATOR 4.0 +++ I LOVE CATS +++
+    </marquee>
+</div>
+
+<center>
+    <table class="main-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <td colspan="2">
+                <div class="header-box">
+                    <h1>&#10024; ÇAĞLA'S WEBPAGE &#10024;</h1>
+                    <p style="font-size: 14px; color: yellow;">~*~ where magic happens ~*~</p>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <!-- SIDEBAR -->
+            <td class="sidebar">
+                <br>
+                <img src="https://web.archive.org/web/20090829035251/http://geocities.com/SunsetStrip/Club/9027/blue-anim-dragon.gif" width="80">
+                <br><br>
+                <b><u>NAVIGATION</u></b><br><br>
+                <a href="#">[ HOME ]</a><br><br>
+                <a href="#">[ ABOUT ME ]</a><br><br>
+                <a href="#">[ MY PICS ]</a><br><br>
+                <a href="#">[ POETRY ]</a><br><br>
+                <a href="#">[ LINKS ]</a><br><br>
+                <a href="#">[ EMAIL ME ]</a><br><br>
+                <br>
+                <div class="blink">NEW!!!</div>
+                <a href="#">[ MY DIARY ]</a>
+                <br><br>
+                <br>
+                <img src="https://web.archive.org/web/20091027005003/http://geocities.com/Heartland/Acres/4885/button10.gif">
+            </td>
+
+            <!-- MAIN CONTENT -->
+            <td class="content">
+                <center>
+                    <img src="https://media.giphy.com/media/cfuL5gqFDreBbafCN/giphy.gif" alt="Construction Worker">
+                    <h3><span class="blink">!!! UNDER CONSTRUCTION !!!</span></h3>
+                    <p>Hi guys!!! Welcome to my personal site. <br>Please be patient I am still learning HTML :)</p>
+                </center>
+                
+                <div class="divider"></div>
+
+                <h3>&#9829; About Çağla &#9829;</h3>
+                <p>
+                    <b>Name:</b> Çağla<br>
+                    <b>Age:</b> That's a secret! ;)<br>
+                    <b>Location:</b> Earth<br>
+                    <b>Mood:</b> Hyper!! ^_^<br>
+                    <b>Music:</b> Britney, Spice Girls, Backstreet Boys<br>
+                </p>
+                <p>
+                    I made this page to share my thoughts and cool stuff I find on the web. 
+                    If you don't like it, click the BACK button on your browser!!! 
+                    <br><br>
+                    <i>"Be yourself because everyone else is taken."</i>
+                </p>
+
+                <div class="win95-box">
+                    <div class="win95-title">Music Player</div>
+                    <div class="win95-content">
+                        Playing: <b>Toxic.midi</b><br>
+                        <button>&#9654;</button> <button>&#9612;&#9612;</button> <button>&#9632;</button>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>&#9734; My Cool Links &#9734;</h3>
+                <ul>
+                    <li><a href="#">Neopets</a> - Add me as a friend!!</li>
+                    <li><a href="#">Dollz</a> - Make your own avatars</li>
+                    <li><a href="#">AltaVista</a> - Search the web</li>
+                    <li><a href="#">Hampster Dance</a> - So funny lol</li>
+                </ul>
+
+                <br><br>
+                <center>
+                    <p>You are visitor number:</p>
+                    <div style="background: black; border: 2px inset white; color: red; font-family: 'Courier New'; display: inline-block; padding: 2px 10px; font-size: 20px; letter-spacing: 5px;">
+                        01429
+                    </div>
+                    <br><br>
+                    <a href="#">Sign My Guestbook</a> | <a href="#">View My Guestbook</a>
+                    <br><br>
+                    <small>Copyright 1999-2001 Çağla's Webpage. Do not steal my layout!!</small>
+                    <br><br>
+                    <img src="https://web.archive.org/web/20091026213038/http://geocities.com/RainForest/Vines/1684/ie_logo.gif">
+                    <img src="https://web.archive.org/web/20091027063321/http://geocities.com/Area51/Cavern/3371/ns_logo.gif">
+                </center>
+            </td>
+        </tr>
+    </table>
+</center>
+
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Oracle's Orb</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Quicksand:wght@300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orb-color: #d8b4fe;
+            --glow-color: #a855f7;
+            --bg-dark: #0f0a1e;
+            --text-color: #f3e8ff;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 50% 50%, #2e1065 0%, #0f0a1e 70%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 20%);
+            color: var(--text-color);
+            font-family: 'Cinzel Decorative', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            text-align: center;
+            cursor: pointer; /* Click anywhere */
+        }
+
+        /* --- THE CRYSTAL ORB --- */
+        .orb-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin-bottom: 50px;
+            animation: float 6s ease-in-out infinite;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .orb {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(216, 180, 254, 0.4) 20%, 
+                rgba(168, 85, 247, 0.6) 50%, 
+                rgba(88, 28, 135, 0.9) 90%);
+            box-shadow: 
+                0 0 30px var(--glow-color),
+                0 0 60px var(--glow-color),
+                inset 0 0 20px rgba(255, 255, 255, 0.5);
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+        }
+        
+        /* Inner mist effect */
+        .orb::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1), transparent 60%);
+            animation: mistRotate 10s linear infinite;
+            opacity: 0.6;
+        }
+
+        .orb:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 40px #d8b4fe,
+                0 0 80px var(--glow-color),
+                inset 0 0 30px rgba(255, 255, 255, 0.8);
+        }
+
+        .orb:active {
+            transform: scale(0.95);
+        }
+
+        /* The Stand */
+        .stand {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 40px;
+            background: linear-gradient(to bottom, #4c1d95, #2e1065);
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: -1;
+        }
+
+        /* --- THE PROPHECY TEXT --- */
+        .prophecy-container {
+            min-height: 150px;
+            width: 80%;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #prophecy-text {
+            font-size: 1.8rem;
+            line-height: 1.4;
+            color: #e9d5ff;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease-out;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Interaction Classes */
+        .revealed {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            animation: textGlow 2s infinite alternate;
+        }
+
+        .instruction {
+            font-size: 0.9rem;
+            opacity: 0.5;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes mistRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
+            to { text-shadow: 0 0 20px rgba(216, 180, 254, 0.8), 0 0 30px rgba(168, 85, 247, 0.4); }
+        }
+        
+        /* Particle Background (Stars) */
+        .stars {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -2;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0));
+            background-size: 200px 200px;
+            opacity: 0.3;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="stars"></div>
+
+    <div class="orb-container" onclick="castProphecy()">
+        <div class="orb"></div>
+        <div class="stand"></div>
+    </div>
+
+    <div class="prophecy-container">
+        <div id="prophecy-text"></div>
+    </div>
+
+    <div class="instruction">Touch the orb to seal your fate</div>
+
+    <script>
+        const prophecies = [
+            "the banana will betray you",
+            "you will lose a sock but gain perspective",
+            "he knows",
+            "you are being watched but lovingly",
+            "do not open the third drawer",
+            "a pigeon will change your fate",
+            "you will be forgotten but in a poetic way",
+            "beware the man with two first names",
+            "mercury is not in retrograde you just made bad choices",
+            "your ex is still talking about you",
+            "something strange will happen with a cucumber",
+            "you will trip on air and someone important will see",
+            "your next decision will be the wrong one and it will be okay",
+            "they remember even if you don’t",
+            "a portal is opening don’t look at it",
+            "you’re safe for now",
+            "you will be blessed with clarity and cursed with wifi instability",
+            "three ghosts are following you but they think you’re cool",
+            "you left the stove on in a past life",
+            "you are not the main character today",
+            "the moon saw what you did",
+            "avoid eye contact with the owl",
+            "your doppelgänger is doing better than you",
+            "the algorithm is learning your scent",
+            "love is near but so is tax season",
+            "you will meet a beautiful liar on a tuesday",
+            "don’t trust the soup",
+            "a child will name you correctly",
+            "one of your plants is plotting",
+            "a stranger will mistake you for someone they miss",
+            "the crystals are disappointed",
+            "the wind heard your secret",
+            "your phone knows too much and still wants more",
+            "your name is written in gravy on an altar somewhere",
+            "a librarian will change your fate",
+            "the vibes are off and it’s your fault",
+            "you are being gently hexed by someone in crocs",
+            "stop refreshing the tracking page",
+            "you forgot something crucial in a dream",
+            "the mice remember",
+            "your next great idea will come from spite",
+            "an old password is holding a grudge",
+            "you already met your soulmate and ignored them",
+            "they know you saw it",
+            "the toast was a warning",
+            "your bed is haunted but in a flirty way",
+            "an unclaimed sock holds your destiny",
+            "a frog envies your life",
+            "your playlist is summoning something",
+            "one of your friends is a shapeshifter and that’s okay",
+            "something important will happen at 3am and you’ll miss it",
+            "your reflection hesitated",
+            "someone is using your selfie for a vision board",
+            "your dreams are being live streamed",
+            "the elevator is lying",
+            "a cursed coupon is coming in the mail",
+            "you will win an argument but lose a spoon",
+            "someone whispered your name to a mirror",
+            "do not reply to the third message",
+            "your next snack will reveal everything"
+        ];
+
+        const textEl = document.getElementById('prophecy-text');
+        const orb = document.querySelector('.orb');
+
+        function castProphecy() {
+            // 1. Fade out existing text
+            textEl.classList.remove('revealed');
+            textEl.style.opacity = '0';
+            textEl.style.transform = 'translateY(-10px)';
+
+            // 2. Flash the Orb
+            orb.style.boxShadow = "0 0 60px #fff, 0 0 100px var(--glow-color)";
+            setTimeout(() => {
+                orb.style.boxShadow = ""; // Reset inline style to revert to CSS
+            }, 300);
+
+            // 3. Change text and Fade In
+            setTimeout(() => {
+                const randomProphecy = prophecies[Math.floor(Math.random() * prophecies.length)];
+                textEl.innerText = randomProphecy;
+                
+                textEl.style.transform = 'translateY(10px)'; // Reset position for slide up
+                
+                // Trigger reflow
+                void textEl.offsetWidth; 
+                
+                textEl.classList.add('revealed');
+            }, 300);
+        }
+    </script>
+</body>
+</html>

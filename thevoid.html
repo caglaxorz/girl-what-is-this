@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE VOID | anti-productivity</title>
+    <style>
+        /* --- THE VIBE --- */
+        :root {
+            --void-black: #050505;
+            --existential-purple: #bd93f9;
+            --glitch-green: #50fa7b;
+            --despair-grey: #6272a4;
+            --font-fancy: 'Courier New', Courier, serif; 
+            --font-chaos: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: var(--void-black);
+            color: #f8f8f2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-fancy);
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        /* --- THE BLACK HOLE --- */
+        .black-hole-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .black-hole {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #000 40%, #1a0b2e 60%, transparent 70%);
+            border-radius: 50%;
+            box-shadow: 0 0 50px 10px rgba(189, 147, 249, 0.2);
+            animation: breathe 8s infinite alternate;
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 0.4; }
+        }
+
+        /* --- UI LAYOUT --- */
+        .app-wrapper {
+            z-index: 10;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            font-family: var(--font-chaos);
+            font-size: 2.5rem;
+            margin: 0;
+            color: var(--existential-purple);
+            text-shadow: 2px 2px 0px var(--glitch-green);
+            letter-spacing: -2px;
+        }
+
+        .affirmation {
+            font-style: italic;
+            color: var(--despair-grey);
+            font-size: 0.9rem;
+            min-height: 1.5rem;
+            opacity: 0.8;
+        }
+
+        /* --- THE INPUT --- */
+        .input-group {
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--despair-grey);
+            padding: 15px;
+            color: white;
+            font-family: var(--font-fancy);
+            font-size: 1.2rem;
+            text-align: center;
+            outline: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--glitch-green);
+            box-shadow: 0 0 15px rgba(80, 250, 123, 0.2);
+        }
+
+        /* --- THE BUTTON --- */
+        .void-btn {
+            background: transparent;
+            border: 2px solid var(--existential-purple);
+            color: var(--existential-purple);
+            padding: 15px 30px;
+            font-family: var(--font-fancy);
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: lowercase;
+            letter-spacing: 2px;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .void-btn:hover {
+            background: var(--existential-purple);
+            color: var(--void-black);
+            box-shadow: 0 0 20px var(--existential-purple);
+        }
+
+        .void-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* --- PRAISE BUBBLES --- */
+        .praise-bubble {
+            position: absolute;
+            color: var(--glitch-green);
+            font-family: var(--font-chaos);
+            font-size: 14px;
+            pointer-events: none;
+            animation: floatUp 1.5s forwards;
+            white-space: nowrap;
+            z-index: 20;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
+        }
+
+        /* --- TASK DESTRUCTION ANIMATION --- */
+        .doomed-task {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: white;
+            pointer-events: none;
+            animation: suckIntoVoid 1s forwards cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            z-index: 5;
+        }
+
+        @keyframes suckIntoVoid {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { color: var(--glitch-green); transform: translate(-50%, -50%) rotate(180deg) scale(0.5); }
+            100% { opacity: 0; transform: translate(-50%, -50%) rotate(720deg) scale(0); }
+        }
+
+        /* --- BOTTOM STATS --- */
+        .footer-stats {
+            margin-top: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100%;
+            font-size: 0.8rem;
+            color: var(--despair-grey);
+        }
+
+        .pie-chart {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: conic-gradient(var(--existential-purple) 0% 100%);
+            position: relative;
+        }
+        
+        /* The Snail */
+        .snail-track {
+            position: fixed;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            pointer-events: none;
+        }
+        #snail {
+            position: absolute;
+            left: 0;
+            transition: left 1s linear;
+            font-family: monospace;
+            font-size: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="black-hole-container">
+        <div class="black-hole"></div>
+    </div>
+
+    <div class="app-wrapper">
+        <h1 id="app-title">THE VOID</h1>
+        
+        <div class="affirmation" id="daily-affirmation">
+            loading existential dread...
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="task-input" placeholder="what burden are you carrying?" autocomplete="off">
+        </div>
+
+        <button class="void-btn" onclick="submitToVoid()">[ submit to the void ]</button>
+
+        <div class="footer-stats">
+            <div style="text-align: left;">
+                <div class="pie-chart"></div>
+                <div style="margin-top:5px;">productivity: 100%</div>
+                <div style="font-size: 10px;">(you are enough)</div>
+            </div>
+            
+            <div style="text-align: right; max-width: 150px;">
+                <div id="status-msg">tasks ignored: 0</div>
+                <div style="font-size: 10px; margin-top:5px;">please close this app</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="snail-track">
+        <div id="snail">_@/</div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const affirmations = [
+            "you are not behind. time is fake.",
+            "burnout is chic now.",
+            "capitalism is the real toxic trait.",
+            "your inbox will never be empty. release the fantasy.",
+            "rotting in bed is a valid hobby.",
+            "nothing matters, so have a treat.",
+            "your worth is not your output.",
+            "mediocrity is a form of rebellion.",
+            "nap until the economy collapses."
+        ];
+
+        const praise = [
+            "omg stunning",
+            "brave of you",
+            "literally poetry",
+            "beyoncé could never",
+            "genius alert",
+            "revolutionary",
+            "so aesthetic",
+            "stop, you're doing too much",
+            "icon behavior",
+            "main character energy"
+        ];
+
+        const placeholders = [
+            "type your trauma here...",
+            "write down a task & forget about it",
+            "list your failures",
+            "pretend to be busy...",
+            "feed the void..."
+        ];
+
+        // --- STATE ---
+        let tasksIgnored = 0;
+        const input = document.getElementById('task-input');
+        const affirmationEl = document.getElementById('daily-affirmation');
+        const snail = document.getElementById('snail');
+        const title = document.getElementById('app-title');
+
+        // --- INIT ---
+        window.onload = () => {
+            affirmationEl.innerText = affirmations[Math.floor(Math.random() * affirmations.length)];
+            input.placeholder = placeholders[Math.floor(Math.random() * placeholders.length)];
+            moveSnail();
+            
+            // Randomly glitch the title
+            setInterval(() => {
+                if(Math.random() > 0.9) {
+                    title.style.fontFamily = Math.random() > 0.5 ? "var(--font-chaos)" : "var(--font-fancy)";
+                    title.style.color = Math.random() > 0.5 ? "var(--glitch-green)" : "var(--existential-purple)";
+                    setTimeout(() => {
+                        title.style.fontFamily = "var(--font-chaos)";
+                        title.style.color = "var(--existential-purple)";
+                    }, 100);
+                }
+            }, 2000);
+        };
+
+        // --- SNAIL LOGIC ---
+        function moveSnail() {
+            let pos = 0;
+            setInterval(() => {
+                pos += 0.05; // Extremely slow
+                if (pos > 100) pos = -5;
+                snail.style.left = pos + '%';
+            }, 100);
+        }
+
+        // --- INPUT HANDLER (PRAISE GENERATOR) ---
+        input.addEventListener('input', (e) => {
+            if (Math.random() > 0.7) { // 30% chance per keystroke
+                spawnPraise();
+            }
+        });
+
+        function spawnPraise() {
+            const el = document.createElement('div');
+            el.classList.add('praise-bubble');
+            el.innerText = praise[Math.floor(Math.random() * praise.length)];
+            
+            // Random position near the input
+            const rect = input.getBoundingClientRect();
+            const randomX = (Math.random() * 200) - 100;
+            
+            el.style.left = (rect.left + rect.width/2 + randomX) + 'px';
+            el.style.top = (rect.top - 20) + 'px';
+            
+            document.body.appendChild(el);
+            
+            setTimeout(() => el.remove(), 1500);
+        }
+
+        // --- THE BUTTON (THE VOID) ---
+        function submitToVoid() {
+            const text = input.value;
+            if (!text.trim()) {
+                spawnPraise(); // Praise them even for empty submission
+                return;
+            }
+
+            // 1. Create the floating text element
+            const doom = document.createElement('div');
+            doom.classList.add('doomed-task');
+            doom.innerText = text;
+            document.body.appendChild(doom);
+
+            // 2. Clear input immediately
+            input.value = "";
+            
+            // 3. Audio Hallucination (Synth Drone)
+            playVoidSound();
+
+            // 4. Update Stats
+            tasksIgnored++;
+            document.getElementById('status-msg').innerText = `tasks ignored: ${tasksIgnored}`;
+
+            // 5. Cleanup DOM
+            setTimeout(() => {
+                doom.remove();
+            }, 1000);
+
+            // 6. Sometimes give a fake error
+            if (Math.random() > 0.8) {
+                setTimeout(() => {
+                    alert("Error: You are doing too great. Please stop.");
+                }, 500);
+            }
+        }
+
+        // --- SOUND GENERATION (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playVoidSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.type = 'sawtooth';
+            // Drop pitch from high to deep low
+            oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 1);
+            
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 1);
+        }
+
+    </script>
+</body>
+</html>

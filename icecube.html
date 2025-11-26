@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melt the Ice Cube</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f4f8; /* Very soft icy white/blue */
+            font-family: 'Inter', sans-serif;
+            color: #4a5568;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #ice-cube {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 10px 30px rgba(173, 216, 230, 0.4);
+            /* Initial state */
+            opacity: 1;
+            filter: blur(0px);
+            transform: scale(1);
+        }
+
+        #ice-cube:hover {
+            box-shadow: 0 15px 40px rgba(173, 216, 230, 0.6);
+            transform: scale(1.02);
+        }
+
+        #ice-cube:active {
+            transform: scale(0.98);
+        }
+
+        #final-message {
+            position: absolute;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 2s ease-in;
+            z-index: 10;
+        }
+
+        .line {
+            display: block;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 200;
+            letter-spacing: 2px;
+            opacity: 0; /* Staggered fade in */
+            transform: translateY(10px);
+            transition: all 1s ease-out;
+        }
+
+        /* Utility class to hide the ice cube abruptly at the end */
+        .gone {
+            display: none !important;
+        }
+
+        /* Utility for showing lines */
+        .visible {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        /* Progress hint (optional, kept very subtle) */
+        #counter-hint {
+            position: fixed;
+            bottom: 20px;
+            font-size: 0.8rem;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <!-- Using a clean, high-res ice cube image -->
+        <img id="ice-cube" src="https://png.pngtree.com/png-clipart/20250209/original/pngtree-ice-cube-with-water-droplets-png-image_20401930.png" alt="A single ice cube">
+        
+        <div id="final-message">
+            <span class="line" id="line1">here</span>
+            <span class="line" id="line2">you did this</span>
+            <span class="line" id="line3">it's gone</span>
+        </div>
+    </div>
+
+    <script>
+        const iceCube = document.getElementById('ice-cube');
+        const finalMessage = document.getElementById('final-message');
+        const lines = [
+            document.getElementById('line1'),
+            document.getElementById('line2'),
+            document.getElementById('line3')
+        ];
+
+        let clicks = 0;
+        const maxClicks = 42;
+
+        iceCube.addEventListener('click', () => {
+            clicks++;
+
+            if (clicks < maxClicks) {
+                // Calculate melting percentage (0 to 1)
+                const melted = clicks / maxClicks;
+
+                // 1. Reduce Opacity (starts at 1, goes to 0)
+                const newOpacity = 1 - melted;
+
+                // 2. Increase Blur (starts at 0px, goes to 20px)
+                const newBlur = melted * 20;
+
+                // 3. Scale Down slightly (starts at 1, goes to 0.6)
+                const newScale = 1 - (melted * 0.4);
+
+                // 4. Distort slightly (rotate randomly a bit more as it melts)
+                const distortion = Math.random() * (melted * 10) - (melted * 5); 
+
+                // Apply styles
+                iceCube.style.opacity = newOpacity;
+                iceCube.style.filter = `blur(${newBlur}px)`;
+                
+                // We use a specific transform here, overriding the hover effect slightly
+                // to make it look like it's losing structural integrity
+                iceCube.style.transform = `scale(${newScale}) rotate(${distortion}deg)`;
+                
+                // Add a "water" drop shadow that grows
+                iceCube.style.boxShadow = `0 ${10 + (melted * 50)}px ${30 + (melted * 20)}px rgba(173, 216, 230, ${0.4 + (melted * 0.4)})`;
+
+            } else {
+                // Trigger the end state
+                endGame();
+            }
+        });
+
+        function endGame() {
+            // Remove the ice cube
+            iceCube.classList.add('gone');
+            
+            // Show the container for the message
+            finalMessage.style.opacity = '1';
+
+            // Stagger the text reveal
+            setTimeout(() => lines[0].classList.add('visible'), 500);
+            setTimeout(() => lines[1].classList.add('visible'), 2000);
+            setTimeout(() => lines[2].classList.add('visible'), 4000);
+        }
+    </script>
+</body>
+</html>

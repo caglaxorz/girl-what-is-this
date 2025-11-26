@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metaphysical Office of Soul Records</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-cream: #E8E0D5;
+            --ink-black: #2A2420;
+            --faded-red: #8a3324;
+            --paper-shadow: #bcaaa4;
+            --gold: #C5A059;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: var(--bg-cream);
+            color: var(--ink-black);
+            font-family: 'Libre Baskerville', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Noisy texture for dust effect */
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjEiLz48L3N2Zz4=');
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="%232A2420" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>') 0 24, auto;
+        }
+
+        /* --- THE DOCUMENT CONTAINER --- */
+        .document-container {
+            width: 90%;
+            max-width: 700px;
+            background-color: #f4ece2;
+            padding: 60px 50px;
+            box-shadow: 
+                0 0 20px rgba(0,0,0,0.1),
+                inset 0 0 60px rgba(161, 140, 116, 0.3);
+            border: 1px solid #d3c4b1;
+            position: relative;
+            margin: 40px 0;
+        }
+
+        /* Ornate Border (CSS Only) */
+        .document-container::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 2px solid var(--ink-black);
+            pointer-events: none;
+        }
+        .document-container::after {
+            content: '';
+            position: absolute;
+            top: 20px; left: 20px; right: 20px; bottom: 20px;
+            border: 1px solid var(--ink-black);
+            pointer-events: none;
+        }
+
+        /* Ink Splatters */
+        .ink-splatter {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(42, 36, 32, 0.1) 0%, transparent 60%);
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(2px);
+            z-index: 0;
+        }
+
+        /* --- HEADER & CREST --- */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid var(--ink-black);
+            padding-bottom: 20px;
+            position: relative;
+        }
+
+        .crest {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            border: 2px solid var(--ink-black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            font-size: 40px;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 1.2rem;
+            margin: 10px 0 5px 0;
+        }
+
+        .subtitle {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: #5a524a;
+        }
+
+        /* --- FORM --- */
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        input, select {
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed var(--ink-black);
+            padding: 10px 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--ink-black);
+            outline: none;
+            width: 100%;
+            cursor: text;
+        }
+        
+        select {
+            cursor: pointer;
+        }
+
+        input::placeholder {
+            color: rgba(42, 36, 32, 0.3);
+            font-style: italic;
+        }
+
+        button.request-btn {
+            margin-top: 20px;
+            background: transparent;
+            border: 2px solid var(--ink-black);
+            padding: 15px 30px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            align-self: center;
+        }
+
+        button.request-btn:hover {
+            background: var(--ink-black);
+            color: var(--bg-cream);
+        }
+
+        /* --- LOADING SEAL --- */
+        .loading-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .wax-seal {
+            width: 60px;
+            height: 60px;
+            background-color: var(--faded-red);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 0 4px rgba(138, 51, 36, 0.3),
+                inset 0 0 20px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(0,0,0,0.3);
+            font-size: 24px;
+            animation: pulse-spin 2s infinite ease-in-out;
+            border: 2px solid #5e2219;
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            font-style: italic;
+            font-size: 0.9rem;
+            animation: blink 1.5s infinite;
+        }
+
+        /* --- RESULTS --- */
+        .result-section {
+            display: none;
+            border-top: 1px solid var(--ink-black);
+            margin-top: 30px;
+            padding-top: 30px;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .data-row {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .data-label {
+            font-weight: bold;
+            text-transform: lowercase;
+            font-variant: small-caps;
+            margin-right: 5px;
+            font-size: 1.1rem;
+        }
+
+        .data-value {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .stamp {
+            margin-top: 40px;
+            border: 3px double var(--faded-red);
+            color: var(--faded-red);
+            width: fit-content;
+            padding: 10px 20px;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            transform: rotate(-10deg);
+            opacity: 0.8;
+            mix-blend-mode: multiply;
+        }
+
+        /* Animations */
+        @keyframes pulse-spin {
+            0% { transform: scale(0.95) rotate(0deg); }
+            50% { transform: scale(1.05) rotate(180deg); }
+            100% { transform: scale(0.95) rotate(360deg); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden { display: none; }
+
+    </style>
+</head>
+<body>
+
+    <div class="document-container">
+        <!-- Decoration -->
+        <div class="ink-splatter" style="top: -20px; right: -20px;"></div>
+        <div class="ink-splatter" style="bottom: 50px; left: 10px; width: 60px; height: 60px; opacity: 0.05;"></div>
+
+        <header>
+            <div class="crest">👁</div>
+            <h1>Metaphysical Office of Soul Records</h1>
+            <div class="subtitle">by appointment only • est. 1204</div>
+        </header>
+
+        <div id="form-area" class="form-section">
+            <div class="input-group">
+                <label>Claimant's First Name</label>
+                <input type="text" id="nameInput" placeholder="e.g. Arthur" autocomplete="off">
+            </div>
+
+            <div class="input-group">
+                <label>Month of Birth</label>
+                <select id="monthInput">
+                    <option value="" disabled selected>Select Month</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Primary Resonance (Vibe)</label>
+                <select id="vibeInput">
+                    <option value="" disabled selected>Select Vibe</option>
+                    <option value="melancholic">Melancholic</option>
+                    <option value="chaotic">Chaotic</option>
+                    <option value="ambitious">Ambitious</option>
+                    <option value="submissive">Submissive to Fate</option>
+                    <option value="haunted">Mildly Haunted</option>
+                    <option value="longing">Oceanic Longing</option>
+                    <option value="vindictive">Quietly Vindictive</option>
+                    <option value="lost">Just Lost</option>
+                </select>
+            </div>
+
+            <button class="request-btn" onclick="fetchRecord()">Request Past Life File</button>
+        </div>
+
+        <!-- LOADING -->
+        <div id="loader" class="loading-overlay">
+            <div class="wax-seal">⚓</div>
+            <div class="loading-text">retrieving soul imprint... please stand by...</div>
+        </div>
+
+        <!-- RESULT -->
+        <div id="result-area" class="result-section">
+            <div class="record-header">
+                <span id="file-id">FILE #000</span>
+                <span>STATUS: CLOSED</span>
+            </div>
+            
+            <div class="data-row">
+                <span class="data-label">Name:</span>
+                <span class="data-value" id="res-name"></span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Classification:</span>
+                <span class="data-value" id="res-class"></span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Active Period:</span>
+                <span class="data-value" id="res-period"></span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Temperament:</span>
+                <span class="data-value" id="res-temp"></span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Notable Trait:</span>
+                <span class="data-value" id="res-trait"></span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Known Associations:</span>
+                <span class="data-value" id="res-assoc"></span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Cause of Death:</span>
+                <span class="data-value" id="res-death"></span>
+            </div>
+
+            <div class="stamp">VERIFIED</div>
+            
+            <div style="margin-top: 30px; text-align: center; font-size: 0.7rem; opacity: 0.5;">
+                <a href="#" onclick="resetForm()" style="color: inherit; text-decoration: underline;">Inquire about another soul</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // The Database
+        const database = [
+            { class: "The third-born flamekeeper of the ash coast", period: "1732–1789", temp: "Restless, obedient to strange winds", trait: "Once disappeared into the sea for seven days and returned changed", assoc: "A glassmaker, a nun, two wolves", death: "Unknown but rumored" },
+            { class: "Silent archivist of the silver ledgers", period: "1641–1694", temp: "Brittle, dutiful, easily haunted", trait: "Could identify any ink by scent", assoc: "One monk, a lost twin, a locked cabinet", death: "Archival dust inhalation" },
+            { class: "Fourth attendant to the broken crown", period: "1420–1455", temp: "Obedient with brief flashes of defiance", trait: "Burned every letter after reading it", assoc: "A horse thief, a scribe, three mirrors", death: "Trampled during a failed rehearsal" },
+            { class: "Seasonal poisoner (rural assignment)", period: "1803–1832", temp: "Calm, calculating, not without conscience", trait: "Never wore shoes, even in snow", assoc: "Two widows, a snake, one unsent letter", death: "Slipped in her own oil" },
+            { class: "Counterfeit heir to a collapsing estate", period: "1768–1810", temp: "Charming, exhausted, mildly cursed", trait: "Could play piano with gloves on", assoc: "A paperboy, a stage actor, a glass ring", death: "Misfiled inheritance dispute turned duel" },
+            { class: "Herbal intermediary (unlicensed)", period: "1599–1630", temp: "Warm, secretive, slightly wet", trait: "Kept notes in six dialects", assoc: "Four chickens, a masked courier, the town well", death: "Wrongly blamed, quietly buried" },
+            { class: "Unknowing prophet (later revoked)", period: "1872–1879", temp: "Manic, sincere, slightly translucent", trait: "Once correctly guessed the contents of 17 locked boxes", assoc: "A thunderstorm, a widow, a tax collector", death: "Accidental flooding of a dry room" },
+            { class: "Lighthouse understudy", period: "1701–1725", temp: "Repetitive, hopeful, sea-damp", trait: "Never slept indoors", assoc: "One captain, several barnacles, a dog that never aged", death: "Fell upward" },
+            { class: "Registered emotional courier (north quadrant)", period: "1821–1847", temp: "Delicate but efficient", trait: "Whispered only to flowers", assoc: "A weaver, two clocks, three strangers who never blinked", death: "Delayed collapse" },
+            { class: "Honorary librarian of forbidden floor six", period: "1490–1523", temp: "Dusty, suspicious, well-read", trait: "Remembered every book they’d never read", assoc: "Three chairs, a banned publisher, their own reflection", death: "Speculative, not discussed" },
+            { class: "Misplaced bride of a bureaucrat", period: "1883–1886", temp: "Patient, semi-transparent, polite", trait: "Could fold anything into a perfect square", assoc: "An unpaid seamstress, one violinist, several small fires", death: "Waiting room incident" },
+            { class: "Second mouth of the quiet council", period: "1351–1365", temp: "Steady, unreadable, humming", trait: "Spoke only in archived phrases", assoc: "A cracked bell, a painted rock, two unnamed daughters", death: "Silence withdrawal" },
+            { class: "Dream handler (temporary position)", period: "1830–1834", temp: "Distracted, kind, faintly glowing", trait: "Smelled like citrus despite the climate", assoc: "A dog named “recompense”, three distant suns, a dentist", death: "Forgotten mid-shift" },
+            { class: "Wind consultant to a minor duchy", period: "1740–1755", temp: "Critical, breezy, aloof", trait: "Wore scarves in defiance of temperature", assoc: "Three pigeons, a fallen prince, one compass", death: "Blown slightly too far east" },
+            { class: "Unofficial cartographer of imaginary places", period: "1777–1799", temp: "Focused, avoidant, sincere", trait: "Drew maps with eyes closed", assoc: "A blind baker, a red wheel, her own dreams", death: "Found where she shouldn’t have been" },
+            { class: "Failed duplicate (original unknown)", period: "Unclear", temp: "Fragmented, quiet, accurate", trait: "Never blinked at the right time", assoc: "No one", death: "Didn’t happen" },
+            { class: "Monastery gardener (forgeries division)", period: "1306–1324", temp: "Steady, earthy, grimly funny", trait: "Replaced all basil with mint without being caught", assoc: "Two monks, a child who bit everyone, three cracked pots", death: "Soil collapse" },
+            { class: "Emotional bookbinder (unauthorized)", period: "1855–1880", temp: "Melancholic, precise, tender", trait: "Remembered everyone else's heartbreak", assoc: "A widow, a publisher, someone who forgot her name", death: "Slow unraveling" },
+            { class: "Incidental oracle", period: "1609–1621", temp: "Sensitive, bitter, easily interrupted", trait: "Predicted four events, refused to talk about any of them", assoc: "A mirror, a rabbit, someone else's reflection", death: "Documented incorrectly" },
+            { class: "Apprentice grief collector (license pending)", period: "1901–1906", temp: "Soft, persistent, unreachable", trait: "Wore gloves at all times, even in letters", assoc: "A priest, a ledger, a lost scarf", death: "Fell asleep during inventory" },
+            { class: "Seventh vessel of the frost vigil", period: "1750–1782", temp: "Sharp, cold, low-burning", trait: "Could track anyone by the sound of their breathing", assoc: "A cousin, a glass fox, one war", death: "Burned quietly from the inside" },
+            { class: "Temporary night archivist", period: "1662–1675", temp: "Restless, organized, never quite warm", trait: "Filed their dreams alphabetically", assoc: "A broken umbrella, a taxidermist, silence", death: "Collapsed quietly under a shelf" },
+            { class: "Witness to the unrecountable hour", period: "1501–1513", temp: "Twitchy, loyal, vaguely burned", trait: "Never remembered their birthday", assoc: "A locked barn, a preacher, one empty glass", death: "Disputed by all three witnesses" },
+            { class: "Emotional lighthouse (unlit)", period: "1844–1871", temp: "Flickering, resistant, damp", trait: "Could predict fog with alarming accuracy", assoc: "Two boats, one knife, several foghorns", death: "Mistaken for someone else entirely" },
+            { class: "Counterfeit sister", period: "1735–1751", temp: "Vague, smiling, memorized", trait: "Responded to three names, none of them hers", assoc: "A real sister, a mapmaker, a wall with writing on it", death: "Vanished during a census" },
+            { class: "Municipal keyholder (doors division)", period: "1822–1850", temp: "Dry, precise, stern when necessary", trait: "Could open any door except their own", assoc: "A locksmith, a locked chest, four staircases", death: "Misfiled under “miscellaneous”" },
+            { class: "Court jester (in theory)", period: "1399–1402", temp: "Sharp, bitter, loosely tolerated", trait: "Once made a king snort wine", assoc: "A rat, a note, a brief rebellion", death: "Laughter, allegedly" },
+            { class: "Emotional forger", period: "1770–1790", temp: "Sweet, uncertain, increasingly unstable", trait: "Created love letters for people who didn’t ask", assoc: "A teacher, two letters never sent, one grave", death: "Broke open mid-conversation" },
+            { class: "Overlooked twin", period: "1604–1620", temp: "Still, observant, easily erased", trait: "Only ever spoken of in footnotes", assoc: "A mirror, a dresser drawer, a louder sibling", death: "Shared" },
+            { class: "Cartographer of unwalkable roads", period: "1795–1811", temp: "Bone-tired, curious, quiet", trait: "Never used ink, only ash", assoc: "A crow, a cracked compass, three warnings", death: "Followed her own map too far" },
+            { class: "Substitute body at public executions", period: "1348–1349", temp: "Unrecorded", trait: "Never blinked during lightning", assoc: "Unknown", death: "Assumed" },
+            { class: "Wandering apology", period: "Uncertain", temp: "Weightless, reverent, lightly afraid", trait: "Said sorry 812 times in their journal", assoc: "An ink stain, a stranger’s coat, nothing else", death: "Eventually" },
+            { class: "Reluctant fortune-teller", period: "1860–1883", temp: "Accurate, embarrassed, low-volume", trait: "Always knew the answer but never wanted to say", assoc: "A librarian, two mismatched gloves, a flood", death: "Nothing loud" },
+            { class: "Seasonal guest", period: "1745–1749", temp: "Quiet, decorative, slightly translucent", trait: "Remembered no addresses, only door handles", assoc: "A soup spoon, a broken clock, a dress that didn’t belong to them", death: "No one noticed" },
+            { class: "Rejected martyr", period: "1410–1430", temp: "Fiery, bruised, misquoted", trait: "Once gave a speech that echoed for four days", assoc: "A torch, a soldier, a retracted poem", death: "Rebranded" },
+            { class: "Shoe borrower", period: "1888–1900", temp: "Apologetic, slightly smug, fleeting", trait: "Never returned a single pair", assoc: "A cobbler, an unpaid bar tab, one goose", death: "Karma" },
+            { class: "Misplaced echo", period: "Unknown", temp: "Repetitive, evasive, kind of hollow", trait: "Once answered a question before it was asked", assoc: "A canyon, a child, a forgotten melody", death: "Eventually looped itself out" },
+            { class: "Hereditary secret-keeper", period: "1691–1722", temp: "Sealed, neutral, a little wet", trait: "Inherited 103 untold truths", assoc: "An attic box, two locks, a single gold ring", death: "Never recorded, by design" },
+            { class: "Feather merchant", period: "1752–1775", temp: "Soft, aloof, slightly sneezy", trait: "Memorized over 400 birdsong cadences", assoc: "A widow, a cage, one disloyal parrot", death: "Allergic reaction (ignored)" },
+            { class: "Intermittent choir member", period: "1473–1481", temp: "Quiet, uneven, shamefully joyful", trait: "Only sang during eclipses", assoc: "A girl with a braid, three low notes, one moth", death: "Choked on a name" },
+            { class: "Professional saboteur (minor league)", period: "1818–1824", temp: "Opportunistic, unrepentant, bored", trait: "Ruined 11 proposals without ever being seen", assoc: "A loose button, a forged invitation, a horse with secrets", death: "Fell into the wrong letter" },
+            { class: "Coatroom attendant to unspeakable things", period: "1866–1869", temp: "Tidy, unnerved, blinking rapidly", trait: "Knew which coat held what secret", assoc: "A lantern, an unnamed guest, 27 receipts", death: "Something that passed through the back door" },
+            { class: "Casual translator of the unreadable", period: "1550–1573", temp: "Awkward, fastidious, slightly cursed", trait: "Could read handwriting no one else saw", assoc: "One illegitimate king, a wine stain, a whisper", death: "Smudged beyond return" },
+            { class: "Freelance guilt distributor", period: "1910–1923", temp: "Knowing, organized, faintly bitter", trait: "Mailed regrets to strangers", assoc: "A priest, a bartender, twelve unopened envelopes", death: "Unclear — several recipients claimed it was their fault" },
+            { class: "Accidental inventor of a soft cult", period: "1782–1791", temp: "Enthusiastic, delusional, oddly convincing", trait: "Kept blessing people without permission", assoc: "Two bakers, a lantern, one goat", death: "Declared divine, then disappeared" },
+            { class: "Professional guest of honor", period: "1726–1740", temp: "Delightful, harmless, emotionally unavailable", trait: "Received gifts they did not open", assoc: "A painter, a locked room, three small cakes", death: "Not publicly announced" },
+            { class: "Last resident of the wrong house", period: "1620–1633", temp: "Territorial, polite, unblinking", trait: "Answered every knock regardless of time", assoc: "A dog that wouldn't enter, a missing address plate, a landlord who lied", death: "Left and never arrived" },
+            { class: "Seasonal apology composer", period: "1871–1893", temp: "Resigned, flowery, chronically delayed", trait: "Never used the word 'sorry'", assoc: "A quill pen, a locked desk drawer, an unsent box", death: "Unknown — their apology arrived six months after" },
+            { class: "Semi-retired witness", period: "1764–1780", temp: "Hesitant, accurate, bored of telling the same story", trait: "Only spoke when interrupted", assoc: "A cane, a broken shutter, a long shadow", death: "Not verified" },
+            { class: "Junior dream tax collector", period: "1813–1817", temp: "Quiet, forgettable, bureaucratically sleepy", trait: "Collected nightmares in little glass jars", assoc: "A fireproof satchel, two nightguards, a goat", death: "Underreported" },
+            { class: "Unfiled entity", period: "Unknown", temp: "N/A", trait: "This record is incomplete", assoc: "[DATA MISSING]", death: "[NOT APPLICABLE]" }
+        ];
+
+        function fetchRecord() {
+            const name = document.getElementById('nameInput').value.trim();
+            const month = document.getElementById('monthInput').value;
+            const vibe = document.getElementById('vibeInput').value;
+
+            if (!name || !month || !vibe) {
+                alert("The clerk requires all fields to be filled before opening the ledger.");
+                return;
+            }
+
+            // UI Transitions
+            document.getElementById('form-area').classList.add('hidden');
+            document.getElementById('loader').style.display = 'flex';
+
+            // Fake processing time
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                displayResult(name, month, vibe);
+            }, 3000);
+        }
+
+        function displayResult(name, month, vibe) {
+            // Create a deterministic index based on inputs
+            // (So the same person gets the same result every time)
+            const inputString = name.toLowerCase() + month + vibe;
+            let hash = 0;
+            for (let i = 0; i < inputString.length; i++) {
+                hash = inputString.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % database.length;
+            const record = database[index];
+            const fileId = Math.abs(hash).toString().substring(0, 4).padStart(4, '0');
+
+            // Populate DOM
+            document.getElementById('file-id').innerText = `FILE #${fileId}`;
+            document.getElementById('res-name').innerText = name.toLowerCase();
+            document.getElementById('res-class').innerText = record.class;
+            document.getElementById('res-period').innerText = record.period;
+            document.getElementById('res-temp').innerText = record.temp;
+            document.getElementById('res-trait').innerText = record.trait;
+            document.getElementById('res-assoc').innerText = record.assoc;
+            document.getElementById('res-death').innerText = record.death;
+
+            // Show result
+            document.getElementById('result-area').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('result-area').style.display = 'none';
+            document.getElementById('form-area').classList.remove('hidden');
+            document.getElementById('nameInput').value = "";
+            document.getElementById('monthInput').selectedIndex = 0;
+            document.getElementById('vibeInput').selectedIndex = 0;
+        }
+    </script>
+</body>
+</html>

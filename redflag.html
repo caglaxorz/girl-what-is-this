@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>red flag or green flag??</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --hot-pink: #ff00cc;
+            --silver: #c0c0c0;
+            --screen-bg: #98fb98; /* LCD Green */
+            --screen-text: #000;
+            --keypad-bg: #e0e0e0;
+        }
+
+        body {
+            background-color: #ff69b4;
+            background-image: 
+                linear-gradient(45deg, #ff69b4 25%, #ff1493 25%, #ff1493 50%, #ff69b4 50%, #ff69b4 75%, #ff1493 75%, #ff1493 100%);
+            background-size: 20px 20px;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'VT323', monospace;
+            overflow: hidden;
+        }
+
+        /* --- THE FLIP PHONE --- */
+        .phone-container {
+            width: 320px;
+            height: 600px;
+            background: linear-gradient(135deg, #dcdcdc 0%, #ffffff 50%, #a9a9a9 100%); /* Silver metallic */
+            border-radius: 20px 20px 40px 40px;
+            padding: 20px;
+            box-shadow: 
+                -10px 10px 20px rgba(0,0,0,0.5),
+                inset 2px 2px 5px rgba(255,255,255,0.8),
+                inset -2px -2px 5px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            border: 4px solid #888;
+        }
+
+        /* Decoration: Rhinestones */
+        .phone-container::before {
+            content: '';
+            position: absolute;
+            top: 10px; right: 10px;
+            width: 10px; height: 10px;
+            background: radial-gradient(white, violet);
+            border-radius: 50%;
+            box-shadow: 0 0 5px white;
+        }
+
+        /* --- THE SCREEN SECTION --- */
+        .screen-bezel {
+            background: #000;
+            padding: 15px;
+            border-radius: 10px 10px 0 0;
+            border: 2px solid #555;
+            height: 45%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .lcd-screen {
+            background-color: var(--screen-bg);
+            width: 100%;
+            height: 100%;
+            border: 2px inset #555;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* Scanlines */
+        .lcd-screen::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        h2 {
+            margin: 0 0 5px 0;
+            font-size: 1.5rem;
+            color: #000080;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 3;
+        }
+
+        .input-area {
+            width: 95%;
+            height: 40px;
+            background: #e0ffe0;
+            border: 1px dashed #006400;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: #000;
+            outline: none;
+            resize: none;
+            z-index: 3;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .result-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            line-height: 1.1;
+            z-index: 3;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: glitch 0.2s infinite;
+            display: none; /* Hidden by default */
+        }
+
+        /* --- THE HINGE --- */
+        .hinge {
+            height: 20px;
+            background: linear-gradient(to bottom, #888, #eee, #888);
+            border-radius: 5px;
+            margin: -10px -20px;
+            z-index: 5;
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+        }
+
+        /* --- THE KEYPAD SECTION --- */
+        .keypad-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 10px;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .soft-key {
+            width: 40px; 
+            height: 20px; 
+            background: #ccc; 
+            border-radius: 5px;
+            border-bottom: 3px solid #999;
+        }
+
+        .d-pad {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ff00cc 20%, #aa0088 100%);
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 0 #660055;
+            color: white;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1;
+        }
+        
+        .d-pad:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0;
+        }
+
+        .num-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 90%;
+        }
+
+        .num-btn {
+            background: linear-gradient(to bottom, #fff, #ddd);
+            height: 35px;
+            border-radius: 10px 10px 15px 15px;
+            border: 1px solid #aaa;
+            box-shadow: 0 3px 0 #888;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #444;
+        }
+
+        /* --- ANIMATIONS & COLORS --- */
+        .red-flag { color: #ff0000; text-shadow: 2px 2px 0px #000; }
+        .green-flag { color: #006400; text-shadow: 2px 2px 0px #fff; }
+        .maybe { color: #000080; text-shadow: 1px 1px 0px #ccc; }
+        .clown { color: #ff00cc; font-size: 2rem; text-shadow: 3px 3px 0px #ffff00; animation: shake 0.5s infinite; }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        <!-- Top Screen Half -->
+        <div class="screen-bezel">
+            <div class="lcd-screen">
+                <div style="width:100%; display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; z-index:3;">
+                    <span>📶 T-Mobile</span>
+                    <span>🔋</span>
+                </div>
+                
+                <h2>JUDGE HIM</h2>
+                
+                <input type="text" id="userInput" class="input-area" placeholder="type what he did here..." autocomplete="off">
+                
+                <div id="resultBox" class="result-display"></div>
+            </div>
+            <div style="text-align: center; color: #fff; font-size: 12px; margin-top: 5px; letter-spacing: 2px;">MOTOROLA</div>
+        </div>
+
+        <!-- The Hinge -->
+        <div class="hinge"></div>
+
+        <!-- Bottom Keypad Half -->
+        <div class="keypad-area">
+            <div class="nav-controls">
+                <div class="soft-key"></div>
+                <button class="d-pad" onclick="judgeHim()">JUDGE<br>HIM</button>
+                <div class="soft-key"></div>
+            </div>
+
+            <!-- Decorative Num Pad -->
+            <div class="num-pad">
+                <div class="num-btn">1 .,</div>
+                <div class="num-btn">2 ABC</div>
+                <div class="num-btn">3 DEF</div>
+                <div class="num-btn">4 GHI</div>
+                <div class="num-btn">5 JKL</div>
+                <div class="num-btn">6 MNO</div>
+                <div class="num-btn">7 PQRS</div>
+                <div class="num-btn">8 TUV</div>
+                <div class="num-btn">9 WXYZ</div>
+                <div class="num-btn">*</div>
+                <div class="num-btn">0 +</div>
+                <div class="num-btn"># 🔇</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sound Context
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playBeep() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.type = 'sawtooth'; // Harsh sound
+            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime); // Low pitch error
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function playWin() {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function judgeHim() {
+            const input = document.getElementById('userInput');
+            const resultBox = document.getElementById('resultBox');
+
+            // Visual feedback: clear current result
+            resultBox.style.display = 'none';
+            
+            if (input.value.trim() === "") {
+                input.placeholder = "TYPE SOMETHING!!";
+                return;
+            }
+
+            // Probability Logic
+            const rand = Math.random(); // 0.0 to 1.0
+            
+            let resultText = "";
+            let resultClass = "";
+
+            if (rand < 0.05) {
+                // 5% Chance
+                resultText = "🤡 YOU’RE THE RED FLAG";
+                resultClass = "clown";
+                playBeep(); // Using error sound for the clown roast too
+            } else {
+                // 95% Chance split 3 ways (~31.6% each)
+                // Normalize the remaining 0.95 to a 0-3 range
+                const remainingRand = Math.floor(Math.random() * 3);
+                
+                if (remainingRand === 0) {
+                    resultText = "🚩 RED FLAG";
+                    resultClass = "red-flag";
+                    playBeep();
+                } else if (remainingRand === 1) {
+                    resultText = "💚 MAYBE HE’S JUST STUPID";
+                    resultClass = "maybe";
+                    playWin();
+                } else {
+                    resultText = "💚 GREEN FLAG GO OFF BESTIE";
+                    resultClass = "green-flag";
+                    playWin();
+                }
+            }
+
+            // Display Result
+            setTimeout(() => {
+                resultBox.style.display = 'flex';
+                resultBox.innerText = resultText;
+                resultBox.className = "result-display " + resultClass;
+            }, 100);
+        }
+    </script>
+</body>
+</html>

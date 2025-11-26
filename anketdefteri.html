@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anket Defteri</title>
+    
+    <!-- Importing a cute, handwritten style font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --cover-pink: #FFC0CB;
+            --page-bg: #fff0f5; /* Lavender Blush */
+            --page-bg-alt: #ffe6f0;
+            --line-color: #ff99cc;
+            --text-color: #555;
+            --shadow: rgba(0, 0, 0, 0.15);
+            --spiral-grey: #dcdcdc;
+            --accent-pink: #ff66b2;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Patrick Hand', cursive;
+            background-color: #ffe4e1;
+            /* Cute subtle pattern background */
+            background-image: radial-gradient(#ffb6c1 15%, transparent 16%),
+                              radial-gradient(#ffb6c1 15%, transparent 16%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+        }
+
+        h1.main-title {
+            font-family: 'Quicksand', sans-serif;
+            color: #ff3385;
+            text-shadow: 2px 2px 0px #fff;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* --- NOTEBOOK CONTAINER --- */
+        .notebook-container {
+            display: flex;
+            width: 900px;
+            max-width: 95%;
+            min-height: 600px;
+            background-color: transparent;
+            position: relative;
+            margin-bottom: 50px;
+            perspective: 1000px;
+            transition: opacity 0.5s ease;
+        }
+
+        .notebook-cover {
+            display: flex;
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px var(--shadow);
+            position: relative;
+        }
+
+        /* --- PAGES --- */
+        .page {
+            flex: 1;
+            padding: 30px 25px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-left {
+            background-color: var(--page-bg);
+            border-radius: 15px 0 0 15px;
+            border-right: 1px solid #eee;
+        }
+
+        .page-right {
+            background-color: var(--page-bg-alt);
+            border-radius: 0 15px 15px 0;
+            border-left: 1px solid #eee;
+        }
+
+        /* --- SPIRAL BINDING --- */
+        .spiral {
+            width: 40px;
+            height: 96%;
+            position: absolute;
+            left: 50%;
+            top: 2%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .coil {
+            width: 100%;
+            height: 12px;
+            background: linear-gradient(90deg, #bbb, #eee, #999);
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transform: rotate(-5deg);
+        }
+
+        /* --- FORM STYLING --- */
+        .photo-area {
+            width: 120px;
+            height: 140px;
+            border: 3px dashed var(--line-color);
+            margin: 0 auto 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            transform: rotate(-3deg);
+        }
+        
+        .photo-text {
+            color: var(--accent-pink);
+            font-size: 1rem;
+            padding: 5px;
+        }
+
+        .heart-deco {
+            font-size: 24px;
+            color: var(--accent-pink);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+
+        label {
+            color: var(--accent-pink);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        input[type="text"], textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--line-color);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: #333;
+            padding: 2px 5px;
+            outline: none;
+            transition: border-color 0.3s;
+            width: 100%;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-bottom: 2px solid #ff3385;
+        }
+
+        /* Special styling for the textarea Note */
+        .note-container {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        textarea {
+            border: 2px solid var(--line-color);
+            border-radius: 10px;
+            padding: 10px;
+            height: 80px;
+            resize: none;
+            margin-top: 5px;
+            background-color: rgba(255,255,255,0.4);
+            line-height: 1.4;
+        }
+
+        /* --- DECORATIONS & BUTTONS --- */
+        .bottom-icons {
+            margin-top: auto;
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--accent-pink);
+            letter-spacing: 15px;
+            opacity: 0.7;
+            padding-top: 15px;
+        }
+
+        button.submit-btn {
+            display: block;
+            margin: 20px auto 0 auto;
+            background-color: var(--accent-pink);
+            color: white;
+            border: none;
+            padding: 10px 40px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.4rem;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            transform: rotate(-2deg);
+        }
+
+        button.submit-btn:hover {
+            transform: rotate(0deg) scale(1.05);
+            background-color: #ff3385;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+        }
+
+        /* --- EASTER EGG SCREEN --- */
+        #easter-egg {
+            display: none;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+            border: 4px dashed var(--accent-pink);
+            max-width: 600px;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .egg-msg-big {
+            font-size: 2.5rem;
+            color: #ff3385;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        .egg-msg-small {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 30px;
+        }
+
+        .back-link {
+            color: var(--accent-pink);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .back-link:hover {
+            color: #ff3385;
+        }
+
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 768px) {
+            .notebook-container {
+                width: 95%;
+                height: auto;
+            }
+            .notebook-cover {
+                flex-direction: column;
+            }
+            .page-left {
+                border-radius: 15px 15px 0 0;
+                border-right: none;
+                border-bottom: 2px dashed #ddd;
+            }
+            .page-right {
+                border-radius: 0 0 15px 15px;
+                border-left: none;
+            }
+            .spiral {
+                display: none; /* Hide spiral on mobile stack */
+            }
+            h1.main-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="main-title">Anket Defteri</h1>
+
+    <!-- FORM SECTION -->
+    <div class="notebook-container" id="notebook">
+        <!-- Spiral Decoration -->
+        <div class="spiral">
+            <div class="coil"></div><div class="coil"></div><div class="coil"></div>
+            <div class="coil"></div><div class="coil"></div><div class="coil"></div>
+            <div class="coil"></div><div class="coil"></div><div class="coil"></div>
+            <div class="coil"></div><div class="coil"></div><div class="coil"></div>
+            <div class="coil"></div><div class="coil"></div><div class="coil"></div>
+            <div class="coil"></div><div class="coil"></div><div class="coil"></div>
+        </div>
+
+        <form class="notebook-cover" onsubmit="handleSubmit(event)">
+            
+            <!-- LEFT PAGE -->
+            <div class="page page-left">
+                <!-- Decorative Photo Area -->
+                <div class="photo-area">
+                    <div>
+                        <span class="heart-deco">♥</span>
+                        <div class="photo-text">Fotoğrafını yapıştırmayı unutma!</div>
+                    </div>
+                </div>
+
+                <!-- Identity Fields -->
+                <div class="form-row">
+                    <label>Ad:</label>
+                    <input type="text" name="ad" required autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Soyad:</label>
+                    <input type="text" name="soyad" required autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Adres:</label>
+                    <input type="text" name="adres" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Tel:</label>
+                    <input type="text" name="tel" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>e-mail:</label>
+                    <input type="text" name="email" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Doğum tarihi/yeri:</label>
+                    <input type="text" name="dogum" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Burcun:</label>
+                    <input type="text" name="burc" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Saç ve göz rengin:</label>
+                    <input type="text" name="sacgoz" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Hobilerin:</label>
+                    <input type="text" name="hobi" autocomplete="off">
+                </div>
+                
+                <div class="bottom-icons">
+                    ☁ ☂ ☃ ☄
+                </div>
+            </div>
+
+            <!-- RIGHT PAGE -->
+            <div class="page page-right">
+                <!-- Preference Fields -->
+                <div class="form-row">
+                    <label>En sevdiğin hayvan:</label>
+                    <input type="text" name="hayvan" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>En sevdiğin yemek:</label>
+                    <input type="text" name="yemek" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>En sevdiğin kitap:</label>
+                    <input type="text" name="kitap" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>En sevdiğin müzik grubu/şarkıcı:</label>
+                    <input type="text" name="muzik" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>En sevdiğin şarkı:</label>
+                    <input type="text" name="sarki" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>En sevdiğin film:</label>
+                    <input type="text" name="film" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>En sevdiğin TV programı:</label>
+                    <input type="text" name="tv" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Sevdiğin:</label>
+                    <input type="text" name="sevdigin" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Sevmediğin:</label>
+                    <input type="text" name="sevmedigin" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>Olmak istediğin kız/erkek:</label>
+                    <input type="text" name="olmak" autocomplete="off">
+                </div>
+                <div class="form-row">
+                    <label>En büyük dileğin:</label>
+                    <input type="text" name="dilek" autocomplete="off">
+                </div>
+                
+                <div class="note-container">
+                    <label>Not:</label>
+                    <textarea name="not"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Gönder</button>
+
+                <div class="bottom-icons">
+                    ♥ ☼ ☾ ☆
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- EASTER EGG SECTION -->
+    <div id="easter-egg">
+        <div style="font-size: 3rem; margin-bottom: 10px;">💖 ✨ 🦋</div>
+        <div class="egg-msg-big">i cant believe u filled this in ur so sweet & ily</div>
+        <div class="egg-msg-small">but idk how to view these so</div>
+        <div class="back-link" onclick="resetForm()">Başa dön ve tekrar doldur</div>
+    </div>
+
+    <script>
+        function handleSubmit(e) {
+            e.preventDefault();
+            
+            // Hide Notebook
+            const notebook = document.getElementById('notebook');
+            notebook.style.opacity = '0';
+            
+            // Wait for transition then switch
+            setTimeout(() => {
+                notebook.style.display = 'none';
+                
+                // Show Easter Egg
+                const egg = document.getElementById('easter-egg');
+                egg.style.display = 'block';
+                
+                // Add some confetti effect (simple visual change)
+                document.body.style.backgroundImage = "radial-gradient(#fff 15%, transparent 16%), radial-gradient(#fff 15%, transparent 16%)";
+                document.body.style.backgroundColor = "#ff99cc";
+            }, 500);
+        }
+
+        function resetForm() {
+            // Hide Egg
+            const egg = document.getElementById('easter-egg');
+            egg.style.display = 'none';
+            
+            // Reset Body Style
+            document.body.style.backgroundColor = "#ffe4e1";
+            document.body.style.backgroundImage = "radial-gradient(#ffb6c1 15%, transparent 16%), radial-gradient(#ffb6c1 15%, transparent 16%)";
+
+            // Show Notebook
+            const notebook = document.getElementById('notebook');
+            notebook.style.display = 'flex';
+            
+            // Trigger reflow
+            void notebook.offsetWidth;
+            
+            notebook.style.opacity = '1';
+            
+            // Optional: clear the inputs
+            document.querySelector('form').reset();
+        }
+    </script>
+</body>
+</html>

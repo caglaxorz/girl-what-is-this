@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💖 HUSBAND FINDER 2000 💖</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffc0cb;
+            background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDIwb2t1M3FraGxkajVyM3EzZzV1MDhhYjU4djRpNHJkYW9ncnp1YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/HiyCpSO2wE6sw/giphy.gif'); /* Pink Glitter Background */
+            background-size: cover;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            cursor: url('https://cur.cursors-4u.net/cursors/cur-2/cur116.cur'), auto;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            border: 4px outset #ff69b4;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            width: 350px;
+            box-shadow: 0 0 20px #ff1493, inset 0 0 20px #fff;
+            backdrop-filter: blur(5px);
+            position: relative;
+        }
+
+        h1 {
+            color: #ff1493;
+            text-shadow: 2px 2px 0px #fff, 4px 4px 0px #ffb6c1;
+            font-size: 28px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #db7093;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            border: 2px dashed #ff69b4;
+            border-radius: 10px;
+            background-color: #fff0f5;
+            color: #c71585;
+            font-family: 'Comic Sans MS', sans-serif;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"]:focus {
+            background-color: #fff;
+            border-style: solid;
+        }
+
+        button {
+            background: linear-gradient(to bottom, #ff69b4, #c71585);
+            border: 2px solid #fff;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: 'Comic Sans MS', sans-serif;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #8b008b;
+            transition: all 0.1s;
+        }
+
+        button:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #8b008b;
+        }
+
+        button:hover {
+            background: linear-gradient(to bottom, #ff1493, #d8bfd8);
+        }
+
+        #result-area {
+            margin-top: 30px;
+            display: none;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .soulmate-name {
+            font-size: 32px;
+            color: #ff0000;
+            font-weight: bold;
+            text-shadow: 2px 2px 0px white;
+            margin: 10px 0;
+            text-transform: uppercase;
+        }
+
+        .vibe-check {
+            font-size: 14px;
+            color: #ff1493;
+            font-style: italic;
+            background-color: yellow;
+            padding: 5px;
+            transform: rotate(-2deg);
+            display: inline-block;
+            border: 1px dotted black;
+        }
+
+        .decor {
+            position: absolute;
+            font-size: 24px;
+        }
+        
+        /* Floating hearts animation */
+        .heart-bg {
+            position: fixed;
+            color: #ff69b4;
+            font-size: 20px;
+            animation: flyUp linear infinite;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        @keyframes flyUp {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .marquee {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #ff1493;
+            color: yellow;
+            font-weight: bold;
+            padding: 5px 0;
+            border-top: 2px solid white;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="marquee">
+        <marquee scrollamount="6">
+            *** LOVE IS IN THE AIR *** FIND YOUR HABIBI TODAY *** 100% ACCURATE (MAYBE) *** DON'T TEXT YOUR EX *** </marquee>
+    </div>
+
+    <div class="container">
+        <div style="font-size: 40px; margin-bottom: -10px;">💍</div>
+        <h1>HUSBAND FINDER</h1>
+        <div class="subtitle">~*~ who is written in your stars? ~*~</div>
+
+        <input type="text" id="girlName" placeholder="Enter your name here...">
+        <br>
+        <button onclick="findHusband()">Find Soulmate Name 💖</button>
+
+        <div id="result-area">
+            <p style="font-size: 14px; margin-bottom: 5px;">Your future hubby is:</p>
+            <div class="soulmate-name" id="boyName">???</div>
+            <br>
+            <div class="vibe-check">Go get yours babe! xoxo</div>
+        </div>
+
+        <!-- Decorative Stickers -->
+        <div class="decor" style="top: 10px; left: 10px;">🦋</div>
+        <div class="decor" style="top: 10px; right: 10px;">🦋</div>
+        <div class="decor" style="bottom: 10px; left: 10px;">💋</div>
+        <div class="decor" style="bottom: 10px; right: 10px;">💄</div>
+    </div>
+
+    <script>
+        // Turkish Boy Names Database
+        const boyNames = [
+            "Mehmet", "Mustafa", "Ahmet", "Ali", "Hüseyin", "Hasan", "İbrahim", "İsmail", "Osman", "Yusuf", 
+            "Murat", "Ömer", "Ramazan", "Halil", "Süleyman", "Abdullah", "Mahmut", "Salih", "Kemal", "Recep",
+            "Sinan", "Metin", "Adem", "Fatih", "Kadir", "Emre", "Hakan", "Burak", "Can", "Barış", 
+            "Arda", "Efe", "Mert", "Kerem", "Umut", "Ozan", "Volkan", "Tolga", "Onur", "Alper", 
+            "Deniz", "Serkan", "Gökhan", "Selçuk", "İlker", "Kaan", "Bora", "Cem", "Koray", "Doruk",
+            "Toprak", "Rüzgar", "Çınar", "Atlas", "Kuzey", "Ediz", "Sarp", "Yaman", "Aras", "Poyraz"
+        ];
+
+        function findHusband() {
+            const input = document.getElementById('girlName').value;
+            
+            if (!input.trim()) {
+                alert("Girl, you gotta type your name first! D'uh! 💅");
+                return;
+            }
+
+            // Simple loading fake-out
+            const btn = document.querySelector('button');
+            const resultArea = document.getElementById('result-area');
+            
+            btn.innerHTML = "Calculating Love... 💘";
+            resultArea.style.display = 'none';
+
+            setTimeout(() => {
+                // Pick random name
+                // We use the input string length to seed the random slightly so it feels "destined" 
+                // but add Math.random so they can retry if they don't like him lol
+                const randomIndex = Math.floor(Math.random() * boyNames.length);
+                const chosenOne = boyNames[randomIndex];
+
+                document.getElementById('boyName').innerText = chosenOne;
+                resultArea.style.display = 'block';
+                btn.innerHTML = "Find Another One? 💔";
+            }, 800); // 800ms delay for suspense
+        }
+
+        // Create background hearts
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-bg');
+            heart.innerHTML = Math.random() > 0.5 ? '💖' : '✨';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, 5000);
+        }
+
+        setInterval(createHeart, 300);
+    </script>
+
+</body>
+</html>

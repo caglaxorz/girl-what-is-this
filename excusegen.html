@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>excuse generator</title>
+    <style>
+        :root {
+            --paper-bg: #fdfbf7;
+            --ink-color: #2b2b2b;
+            --accent-color: #5c5c5c;
+            --font-main: 'Times New Roman', Times, serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: var(--paper-bg);
+            color: var(--ink-color);
+            font-family: var(--font-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: normal;
+            letter-spacing: 0.05em;
+            margin: 0;
+            border-bottom: 1px solid var(--ink-color);
+            padding-bottom: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--ink-color);
+            color: var(--ink-color);
+            padding: 12px 24px;
+            font-family: var(--font-main);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            letter-spacing: 0.02em;
+        }
+
+        button:hover {
+            background-color: var(--ink-color);
+            color: var(--paper-bg);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .excuse-display {
+            min-height: 100px;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .excuse-display.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Subtle decorative element */
+        .container::before {
+            content: "fig. 1";
+            font-size: 0.75rem;
+            color: var(--accent-color);
+            font-style: italic;
+            margin-bottom: -30px;
+            opacity: 0.6;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>excuse generator</h1>
+
+        <button onclick="generateExcuse()">give me an excuse</button>
+
+        <div id="excuse-output" class="excuse-display"></div>
+    </div>
+
+    <script>
+        const excuses = [
+            "hey i’m so sorry but the plumber just showed up two hours early and i need to stay here while they work",
+            "i know this is super last minute but i just got a delivery i wasn’t expecting and it needs to be unpacked and checked right away",
+            "my neighbor’s power is out and i had to help them move their stuff into my fridge so i’m a bit behind on everything",
+            "had to call my internet provider about something weird and of course it turned into a whole thing",
+            "the person i sublet from randomly came by to pick something up and now i can’t leave until they do",
+            "i completely forgot i have to be home for a scheduled maintenance check this afternoon. they just rang the bell",
+            "just found out i need to sign for a delivery window that’s earlier than planned so i can’t step away right now",
+            "i got pulled into something at home and it’s looking like i won’t be able to make it today",
+            "i was planning on coming but now there’s a leak situation in the kitchen and i have to deal with it first",
+            "just got back from running errands and realized i locked myself out of my upstairs storage. waiting on the landlord now",
+            "really thought i’d be free by now but something small turned into a two-hour detour and i’m still not done",
+            "i had a repair appointment booked for tomorrow but they just called and said they’re coming today instead",
+            "just remembered i have a standing call with someone i can’t move and it completely slipped my mind earlier",
+            "my upstairs neighbors have water damage and the building manager asked if they could check my pipes too. i have to stay put",
+            "not gonna make it — my wifi just went down and i’m trying to get them on the phone before the window closes",
+            "i wish i could join but my phone’s been acting up and i’ve had to reset everything which is now taking forever",
+            "just remembered i promised i’d help a friend move a shelf this afternoon and she’s already on her way",
+            "the hot water’s been weird all day and now someone’s here to look at it so i can’t step out or take calls",
+            "i know i said yes but i’m stuck dealing with something in the building and don’t know how long it’ll take",
+            "i was getting ready to leave but then my laundry machine overflowed a bit and now i’m on towel duty",
+            "i just had someone show up to measure the windows and i need to be here while they take notes",
+            "something weird is going on with the plumbing and i’m waiting for someone to come check it out",
+            "i got caught up helping my neighbor with some stuff and lost track of time completely",
+            "the grocery delivery showed up with missing items and now i’m trying to fix it before everything melts",
+            "the internet has been cutting in and out all morning and i didn’t want to risk losing connection halfway through",
+            "i had to stay home to wait for a new appliance and now they’ve pushed the delivery window later",
+            "i’m in the middle of dealing with a weird tech issue and can’t step away yet",
+            "my phone was updating all afternoon and i couldn’t access anything until just now",
+            "i had to help someone carry something heavy upstairs and now i’m kind of stuck here",
+            "something just came up with my building’s maintenance and i’m not sure how long it’ll take",
+            "a friend called with a mini crisis and i couldn’t just ignore it, sorry for the silence",
+            "the locksmith came early and now i’m sitting here while they change out the hardware",
+            "i had to take care of something for my lease renewal and it turned into a whole back-and-forth",
+            "they’re doing unexpected noise testing in the building and i can’t really focus or be on calls right now",
+            "the light in the hallway went out and i had to wait for someone to come fix it before leaving",
+            "i forgot i had to drop off paperwork in person and the office was further than i remembered",
+            "something small turned into a chain reaction and now i’m behind on literally everything",
+            "i opened my laptop to join and immediately got pulled into a neighbor emergency",
+            "the elevator stopped working and i had to take the stairs both ways which took longer than planned",
+            "just realized i left something plugged in that wasn’t supposed to be and had to run back to fix it",
+            "i was trying to fix something quickly before joining and ended up making it worse",
+            "i didn’t want to join while dealing with it but there’s something weird going on with the heating and i’m waiting on someone to check",
+            "my internet provider scheduled a reboot and it just happened to fall right in the middle of this",
+            "i’ve been waiting on hold for half an hour and if i hang up now i’ll lose my place in the queue",
+            "i stepped out for a five-minute errand and it turned into a forty-minute situation",
+            "just realized i had overlapping commitments and totally forgot to block my calendar",
+            "someone came by to drop something off and it turned into a longer conversation than expected",
+            "my building had a brief alarm go off and we had to pause everything until they sorted it out",
+            "i was troubleshooting something small and lost track of the time completely",
+            "just saw the time and realized i underestimated how long it would take to get back from what i was doing",
+            "just remembered i left something at a friend’s place and had to go grab it before they left town",
+            "my neighbor needed help moving something heavy and i couldn’t really say no in the moment",
+            "i had to run out for a quick thing and now i’m stuck behind a delivery truck trying to get back",
+            "my phone was dead most of the afternoon and by the time i got it charged everything was backed up",
+            "just realized my laundry's been sitting in the machine for hours and it needs to be redone before it gets worse",
+            "the person i live with needed help with something right before i was about to leave and now i’m running behind",
+            "something small i’d been putting off finally needed fixing and of course it turned into a bigger mess",
+            "i ended up having to wait on someone who showed up late and now it threw off my whole afternoon",
+            "i meant to check in earlier but had to focus on something i couldn’t stop halfway through",
+            "i had to help someone find their lost keys and didn’t want to leave them alone with it",
+            "just got back home after being out all day and completely forgot what time it was",
+            "a package i was waiting on showed up damaged so i had to deal with the return immediately",
+            "i sat down to get ready and then remembered i had to fill something out that was time-sensitive",
+            "i was trying to wrap something up before joining and it ended up taking longer than i expected",
+            "i forgot to charge my laptop and by the time it was ready i had missed the window",
+            "there’s been construction noise all day and i didn’t want to try to talk over it",
+            "someone asked for help with something quick and it ended up taking over an hour",
+            "something came up with my utilities and i had to stay on-site while they checked it out",
+            "i thought i’d have time but my schedule got shifted and now i’m trying to catch up on everything",
+            "totally spaced after my last meeting and went into full autopilot for an hour"
+        ];
+
+        const output = document.getElementById('excuse-output');
+
+        function generateExcuse() {
+            // Remove visible class to trigger fade out/reset
+            output.classList.remove('visible');
+            
+            // Wait briefly for CSS transition or immediate swap feel
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * excuses.length);
+                output.innerText = excuses[randomIndex];
+                
+                // Add visible class to trigger fade in
+                output.classList.add('visible');
+            }, 100);
+        }
+    </script>
+</body>
+</html>

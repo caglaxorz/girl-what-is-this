@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manifest Fan Club ~*~</title>
+    <style>
+        /* --- Y2K FONTS & BASICS --- */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        body {
+            background-color: #ff0099;
+            /* Classic Y2K Grid Background */
+            background-image: 
+                linear-gradient(90deg, rgba(255,255,255,.1) 50%, transparent 50%),
+                linear-gradient(rgba(255,255,255,.1) 50%, transparent 50%);
+            background-size: 40px 40px;
+            font-family: 'VT323', monospace;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            cursor: crosshair;
+        }
+
+        /* --- MAIN CONTAINER --- */
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            border: 4px outset #ff66cc;
+            background: #000033; /* Deep blue retro contrast */
+            padding: 15px;
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.5);
+        }
+
+        /* --- HEADER STYLES --- */
+        h1 {
+            font-size: 3.5rem;
+            color: #ffff00;
+            text-shadow: 4px 4px #ff00cc;
+            margin: 10px 0;
+            letter-spacing: 4px;
+        }
+
+        .subtitle {
+            font-size: 1.8rem;
+            color: #00ffff;
+            text-transform: uppercase;
+            border-bottom: 2px dashed #00ffff;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        /* --- MARQUEE --- */
+        .marquee-box {
+            background: #fff;
+            color: #000;
+            border: 2px solid #ff00cc;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 4px;
+        }
+
+        /* --- THE BUTTON --- */
+        .magic-button {
+            background: #ff00cc;
+            border: 4px outset #ff99cc;
+            cursor: pointer;
+            color: #fff;
+            font-family: 'VT323', monospace;
+            font-size: 32px;
+            padding: 15px 50px;
+            margin-top: 20px;
+            text-shadow: 2px 2px 0 #000;
+            transition: transform 0.1s;
+        }
+
+        .magic-button:hover {
+            background: #cc00cc;
+            color: #ffff00;
+        }
+
+        .magic-button:active {
+            border-style: inset;
+            transform: translateY(4px);
+        }
+
+        /* --- RESULT CARD (PROFILE) --- */
+        #result-area {
+            display: none;
+            margin-top: 30px;
+            border: 2px solid #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            text-align: left; /* Better for reading descriptions */
+        }
+
+        .profile-header {
+            border: 2px solid #fff;
+            background: #000;
+            color: #ffff00;
+            padding: 10px;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px #ff0000;
+        }
+
+        .profile-section {
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            line-height: 1.4;
+        }
+
+        .label {
+            color: #00ffff;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            margin-top: 40px;
+            font-size: 1rem;
+            color: #ff99cc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="marquee-box">
+            <marquee scrollamount="10" direction="left">
+                +++ MANIFEST FAN CLUB +++ ARE U READY? +++ %100 GERÇEK SONUÇLAR +++ HANGİSİ SENSİN? +++
+            </marquee>
+        </div>
+
+        <h1>~*~ MANIFEST ~*~</h1>
+        <div class="subtitle">HANGİ MANIFEST KIZISIN?</div>
+
+        <p style="font-size: 1.4rem;">
+            Cevabı öğrenmek için aşağıya tıkla... <br>
+            <span style="color: #ffff00;">✨ Kim olduğunu keşfet! ✨</span>
+        </p>
+
+        <button class="magic-button" onclick="findMember()">
+            SONUCU GÖR >>
+        </button>
+
+        <div id="result-area">
+            <div class="profile-header" id="member-name"></div>
+            
+            <div class="profile-section">
+                <span class="label">KİMSİN SEN?:</span><br>
+                <span id="member-intro"></span>
+            </div>
+
+            <div class="profile-section">
+                <span class="label">VIBE'IN:</span><br>
+                <span id="member-vibe"></span>
+            </div>
+
+            <div class="profile-section">
+                <span class="label">GRUBA NE KATIYORSUN?:</span><br>
+                <span id="member-contribution"></span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Made with <3 by Manifest Fans</p>
+            <p>[Best viewed in Internet Explorer 5.0]</p>
+        </div>
+    </div>
+
+    <script>
+        // Member Data based on your description
+        const members = [
+            {
+                name: "SUEDA",
+                intro: "Sen Sueda’sın: grubun en genç üyesi ama enerjin ve sahne ışığın seni asla “küçük kardeş” konumuna düşürmüyor. 10 yılı aşkın dans geçmişin var ve başkalarına da dans öğretiyorsun.",
+                vibe: "Taptaze, capcanlı, kıpır kıpırsın. Neşelisin ama disiplinsiz değilsin. Yeşilin o parlak tonu gibisin—yenileyici, umut verici.",
+                contribution: "Elektriği, hareketi, enerjiyi. Girdiğin ortamı ışıklandırıyorsun. “Sahne ateşi” senden çıkıyor."
+            },
+            {
+                name: "HİLAL",
+                intro: "Sen Hilal’sin: ayakta duruşun sağlam, dansın güçlü, rap kısmı varsa sen oradasın. Bilgisayar mühendisliği okudun ama sahneye dönmeyi tercih ettin çünkü içindeki star titreşimlerini başka hiçbir şey bastıramazdı.",
+                vibe: "Cool ama sıcak, zarif ama güçlü. Topuklu ayakkabılarla dans etmek bile senin için mesele değil.",
+                contribution: "Karizma, teknik güç, güven. Gösterişli olmasan bile seni izlerken insanlar gözlerini senden alamıyor. Sahneye “ağırlık” getiriyorsun."
+            },
+            {
+                name: "LİDYA",
+                intro: "Sen Lidya’sın: o ses senin. Grubun lead vokali olarak duyguyu, derinliği, tınıyı sen taşıyorsun. Tiyatro kökenin ve klasik müzik kulağın var. Rus Dili ve Edebiyatı okudun, yani hem sanatçı hem akademik bir ruhsun.",
+                vibe: "Zarif, duygusal ama net. O dramatik ama samimi havan seni seyirciyle bağ kurmada öne çıkarıyor.",
+                contribution: "İçtenlik, duygusal bağ, güçlü vokal hatları. “Kalbe dokunma” işi sende."
+            },
+            {
+                name: "MİNA",
+                intro: "Sen Mina’sın: dans senin vücut dilin, sahne senin oyun alanın. Kültür yönetimi okudun ama seni ayakta tutan şey ritim. Salsa da biliyorsun, TikTok da.",
+                vibe: "Enerjik, çekici, sahnede göz kırpan yıldız. Göz teması kurarsın ve o an herkes susar.",
+                contribution: "Momentum. Koreografi başladığında kimin lider olduğunu herkes anlar. Sen sahnede bir mıknatıssın."
+            },
+            {
+                name: "ZEYNEP",
+                intro: "Sen Zeynep’sin: dışardan soğuk gibi durursun ama senin içinde alev var. Hayranlar “buz küpü” diyor sana ama o mesafe sadece senin koruma alanın. Rap desen var, laf sokma desen ondan da var.",
+                vibe: "Sakin ama keskin. Çok konuşmazsın ama konuşunca herkes dinler.",
+                contribution: "Edge. Tatlılık fazlaysa sen denge getirirsin. Sahnede “sertlik” ve “cool”luk gerektiğinde öne sen çıkarsın."
+            },
+            {
+                name: "ESİN",
+                intro: "Sen Esin’sin: başta yedek gibiydin ama şimdi grubun değişilmezi oldun. Latin dansından sahnelere uzanan yolculuğunla, sürpriz etkisi yaratıyorsun.",
+                vibe: "Güneş gibi; parlıyorsun ama yakmıyorsun. Sarı rengi temsil ediyorsun çünkü varlığın umut verici.",
+                contribution: "Çeşitlilik, esneklik, beklenmedik anlarda parlayan ışık. İnsanlar seni tanıdıkça daha çok seviyor."
+            }
+        ];
+
+        function findMember() {
+            const resultArea = document.getElementById('result-area');
+            
+            // Add a little loading delay for effect
+            resultArea.style.display = 'none';
+            
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * members.length);
+                const selected = members[randomIndex];
+
+                document.getElementById('member-name').innerText = "*** " + selected.name + " ***";
+                document.getElementById('member-intro').innerText = selected.intro;
+                document.getElementById('member-vibe').innerText = selected.vibe;
+                document.getElementById('member-contribution').innerText = selected.contribution;
+
+                resultArea.style.display = 'block';
+                
+                // Scroll to result
+                resultArea.scrollIntoView({behavior: "smooth"});
+            }, 300);
+        }
+    </script>
+</body>
+</html>
