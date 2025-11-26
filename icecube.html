@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -141,14 +142,17 @@
 
                 // Apply styles
                 iceCube.style.opacity = newOpacity;
-                iceCube.style.filter = `blur(${newBlur}px)`;
+                // Fix: escaped template literal
+                iceCube.style.filter = \`blur(\${newBlur}px)\`;
                 
                 // We use a specific transform here, overriding the hover effect slightly
                 // to make it look like it's losing structural integrity
-                iceCube.style.transform = `scale(${newScale}) rotate(${distortion}deg)`;
+                // Fix: escaped template literal
+                iceCube.style.transform = \`scale(\${newScale}) rotate(\${distortion}deg)\`;
                 
                 // Add a "water" drop shadow that grows
-                iceCube.style.boxShadow = `0 ${10 + (melted * 50)}px ${30 + (melted * 20)}px rgba(173, 216, 230, ${0.4 + (melted * 0.4)})`;
+                // Fix: escaped template literal
+                iceCube.style.boxShadow = \`0 \${10 + (melted * 50)}px \${30 + (melted * 20)}px rgba(173, 216, 230, \${0.4 + (melted * 0.4)})\`;
 
             } else {
                 // Trigger the end state

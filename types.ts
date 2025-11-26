@@ -3,7 +3,6 @@ export interface Project {
   title: string;
   url: string;
   emoji: string;
-  internalId?: string; // If present, opens in a popup window
 }
 
 export interface Song {
@@ -16,5 +15,4 @@ export interface ChaosLinkItem {
   text: string;
   url: string;
   isExternal?: boolean;
-  internalId?: string; // If present, opens in a popup window
 }

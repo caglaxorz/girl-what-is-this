@@ -3,11 +3,7 @@
 import React, { useState } from 'react';
 import { PROJECTS } from '../constants';
 
-interface HamburgerProps {
-  onOpenProject: (id: string) => void;
-}
-
-const Hamburger: React.FC<HamburgerProps> = ({ onOpenProject }) => {
+const Hamburger: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -29,13 +25,7 @@ const Hamburger: React.FC<HamburgerProps> = ({ onOpenProject }) => {
                <li key={project.id}>
                  <a 
                    href={project.url}
-                   onClick={(e) => {
-                     if (project.internalId) {
-                       e.preventDefault();
-                       onOpenProject(project.internalId);
-                       setIsOpen(false);
-                     }
-                   }}
+                   onClick={() => setIsOpen(false)}
                    className="block hover:bg-white p-1 border border-transparent hover:border-pink-300 cursor-pointer group"
                  >
                    <span className="group-hover:animate-spin inline-block mr-2">{project.emoji}</span>
@@ -48,6 +38,7 @@ const Hamburger: React.FC<HamburgerProps> = ({ onOpenProject }) => {
       )}
     </div>
   );
+
 };
 
 export default Hamburger;

@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CHAOS_LINKS } from '../constants';
 import { ChaosLinkItem } from '../types';
 
-interface ChaosLinksProps {
-  onOpenProject: (id: string) => void;
-}
-
-const ChaosLinks: React.FC<ChaosLinksProps> = ({ onOpenProject }) => {
+const ChaosLinks: React.FC = () => {
   const [items, setItems] = useState<{ top: string; left: string; item: ChaosLinkItem; rotation: number }[]>([]);
 
   useEffect(() => {
@@ -44,22 +40,6 @@ const ChaosLinks: React.FC<ChaosLinksProps> = ({ onOpenProject }) => {
             fontFamily: idx % 2 === 0 ? '"Comic Neue", cursive' : '"Courier Prime", monospace',
             color: idx % 3 === 0 ? 'blue' : idx % 3 === 1 ? 'magenta' : 'green',
             zIndex: Math.floor(Math.random() * 20) // Random z-index layer
-          }}
-          onClick={(e) => {
-             if (pos.item.internalId) {
-                 e.preventDefault();
-                 onOpenProject(pos.item.internalId);
-                 return;
-             }
-
-            // Only alert if it's a dummy link
-            if (pos.item.url === '#') {
-                e.preventDefault();
-                // 1 in 5 chance to show an alert for extra annoyance/nostalgia
-                if (Math.random() > 0.8) {
-                    alert("omg where are you going???");
-                }
-            }
           }}
         >
           {pos.item.text}

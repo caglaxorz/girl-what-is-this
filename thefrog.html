@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -125,7 +126,8 @@
             
             // Random rotation for chaos
             const randomRot = (Math.random() * 40) - 20;
-            frog.style.transform = `rotate(${randomRot}deg)`;
+            // Fix: escaped template literal
+            frog.style.transform = \`rotate(\${randomRot}deg)\`;
 
             resetAutoMove();
         }

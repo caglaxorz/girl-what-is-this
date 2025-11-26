@@ -1,113 +1,38 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import Snow from './components/Snow';
 import Ipod from './components/Ipod';
 import ChaosLinks from './components/ChaosLinks';
 import VisitorCounter from './components/VisitorCounter';
 import Marquee from './components/Marquee';
 import Hamburger from './components/Hamburger';
-import ProjectWindow from './components/ProjectWindow';
 import Poll from './components/Poll';
-import { 
-  HUSBAND_FINDER_HTML, 
-  PARTICULARLY_HTML, 
-  HANGI_MANIFEST_HTML, 
-  PAGE_IN_PAGE_HTML,
-  LYRICS_2003_HTML,
-  ANKET_DEFTERI_HTML,
-  ONE_OF_YOU_HTML,
-  RED_FLAG_HTML,
-  THE_CRUNCH_HTML,
-  THE_VOID_HTML,
-  MS_PAINT_HTML,
-  THE_FROG_HTML,
-  RABBIT_HTML,
-  THE_ORB_HTML,
-  SCREAM_HTML,
-  ICECUBE_HTML,
-  EXCUSE_GEN_HTML,
-  HOGWARTS_HTML,
-  PAST_LIFE_HTML,
-  STARTUP_GEN_HTML,
-  TUESDAY_HTML
-} from './data/projects';
 
 const App: React.FC = () => {
-  const [activeProject, setActiveProject] = useState<{ title: string; content: string } | null>(null);
-
-  const handleOpenProject = (id: string) => {
-    switch (id) {
-        case 'husband-finder':
-            setActiveProject({ title: 'Husband Finder', content: HUSBAND_FINDER_HTML });
-            break;
-        case 'particularly':
-            setActiveProject({ title: 'Particularly', content: PARTICULARLY_HTML });
-            break;
-        case 'hangi-manifest':
-            setActiveProject({ title: 'Manifest Fan Club', content: HANGI_MANIFEST_HTML });
-            break;
-        case 'page-in-page':
-            setActiveProject({ title: "Çağla's World", content: PAGE_IN_PAGE_HTML });
-            break;
-        case 'lyrics-2003':
-            setActiveProject({ title: "2003 Lyric Gen", content: LYRICS_2003_HTML });
-            break;
-        case 'anket-defteri':
-            setActiveProject({ title: "Anket Defteri", content: ANKET_DEFTERI_HTML });
-            break;
-        case 'betrayal-calculator':
-            setActiveProject({ title: "Betrayal Calc", content: ONE_OF_YOU_HTML });
-            break;
-        case 'red-flag':
-            setActiveProject({ title: "Red or Green Flag?", content: RED_FLAG_HTML });
-            break;
-        case 'cbs-simulator':
-            setActiveProject({ title: "ÇBS Simulator", content: THE_CRUNCH_HTML });
-            break;
-        case 'anti-productivity':
-            setActiveProject({ title: "The Void", content: THE_VOID_HTML });
-            break;
-        case 'cbs-paint':
-            setActiveProject({ title: "ÇBS Paint", content: MS_PAINT_HTML });
-            break;
-        case 'catch-the-frog':
-            setActiveProject({ title: "Catch the Frog", content: THE_FROG_HTML });
-            break;
-        case 'rabbit':
-            setActiveProject({ title: "Follow the White Rabbit", content: RABBIT_HTML });
-            break;
-        case 'the-orb':
-            setActiveProject({ title: "The Prophecy", content: THE_ORB_HTML });
-            break;
-        case 'scream':
-            setActiveProject({ title: "Scream into the Void", content: SCREAM_HTML });
-            break;
-        case 'ice-cube':
-            setActiveProject({ title: "Ice Ice Baby", content: ICECUBE_HTML });
-            break;
-        case 'excuse-generator':
-            setActiveProject({ title: "Excuse Generator", content: EXCUSE_GEN_HTML });
-            break;
-        case 'hogwarts':
-            setActiveProject({ title: "Sorting Ceremony", content: HOGWARTS_HTML });
-            break;
-        case 'past-life':
-            setActiveProject({ title: "Soul Records", content: PAST_LIFE_HTML });
-            break;
-        case 'startup-generator':
-            setActiveProject({ title: "Stealth Mode", content: STARTUP_GEN_HTML });
-            break;
-        case 'tuesday-check':
-            setActiveProject({ title: "Is It Tuesday?", content: TUESDAY_HTML });
-            break;
-        default:
-            break;
-    }
-  };
-
-  const closeProject = () => {
-    setActiveProject(null);
-  };
+  // Project list for easy navigation to standalone .html files
+  const projects = [
+    { id: 'husband-finder', title: 'Husband Finder', href: '/husband-finder.html' },
+    { id: 'hangi-manifest', title: 'Manifest Fan Club', href: '/hangi-manifest.html' },
+    { id: 'particularly', title: 'Particularly', href: '/particularly.html' },
+    { id: 'page-in-page', title: "Çağla's World", href: '/page-in-page.html' },
+    { id: 'lyrics-2003', title: "2003 Lyric Gen", href: '/2003lyrics.html' },
+    { id: 'anket-defteri', title: "Anket Defteri", href: '/anket-defteri.html' },
+    { id: 'betrayal-calculator', title: "Betrayal Calc", href: '/oneofyou.html' },
+    { id: 'red-flag', title: "Red or Green Flag?", href: '/redflag.html' },
+    { id: 'cbs-simulator', title: "ÇBS Simulator", href: '/thecrunch.html' },
+    { id: 'anti-productivity', title: "The Void", href: '/thevoid.html' },
+    { id: 'cbs-paint', title: "ÇBS Paint", href: '/mspaint.html' },
+    { id: 'catch-the-frog', title: "Catch the Frog", href: '/thefrog.html' },
+    { id: 'rabbit', title: "Follow the White Rabbit", href: '/rabbit.html' },
+    { id: 'the-orb', title: "The Prophecy", href: '/theorb.html' },
+    { id: 'scream', title: "Scream into the Void", href: '/scream.html' },
+    { id: 'ice-cube', title: "Ice Ice Baby", href: '/icecube.html' },
+    { id: 'excuse-generator', title: "Excuse Generator", href: '/excusegen.html' },
+    { id: 'hogwarts', title: "Sorting Ceremony", href: '/hogwarts.html' },
+    { id: 'past-life', title: "Soul Records", href: '/pastliferegistry.html' },
+    { id: 'startup-generator', title: "Stealth Mode", href: '/startupgen.html' },
+    { id: 'tuesday-check', title: "Is It Tuesday?", href: '/tuesday.html' },
+  ];
 
   return (
     <div className="min-h-screen relative font-['Courier_Prime'] text-fuchsia-900 overflow-hidden">
@@ -126,18 +51,9 @@ const App: React.FC = () => {
       
       <Snow />
       <Marquee />
-      <Hamburger onOpenProject={handleOpenProject} />
-      <ChaosLinks onOpenProject={handleOpenProject} />
+      <Hamburger />
+      <ChaosLinks />
       <Ipod />
-
-      {/* Project Popup Window */}
-      {activeProject && (
-        <ProjectWindow 
-          title={activeProject.title} 
-          htmlContent={activeProject.content} 
-          onClose={closeProject} 
-        />
-      )}
 
       {/* Main Content Area */}
       <main className="relative z-30 pt-20 pb-40 px-4 max-w-4xl mx-auto pointer-events-none">
