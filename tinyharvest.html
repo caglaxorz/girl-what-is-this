@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny Harvest</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ui-bg: #e0d5b7;
+            --ui-border: #8b4513;
+            --energy-col: #ffc107;
+            --xp-col: #00bcd4;
+            --debuff-col: #e91e63;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px 0;
+            background: url('https://i.postimg.cc/287M4Dhk/Untitled-design-(1).jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Press Start 2P', cursive;
+            color: #333;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* Start Screen Overlay */
+        #start-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .start-box {
+            background: var(--ui-bg);
+            border: 4px solid var(--ui-border);
+            padding: 40px;
+            text-align: center;
+            color: #333;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        #player-name-input {
+            font-family: 'Press Start 2P', cursive;
+            padding: 10px;
+            margin: 20px 0;
+            font-size: 16px;
+            text-align: center;
+            width: 200px;
+        }
+
+        #game-container {
+            position: relative;
+            border: 12px ridge #5d4037; 
+            border-radius: 8px;
+            box-shadow: 
+                0 0 0 4px #3e2723,
+                0 10px 30px rgba(0,0,0,0.8);
+            background-color: #66bb6a; 
+            image-rendering: pixelated;
+            display: none;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .pixel-icon {
+            width: 16px;
+            height: 16px;
+            image-rendering: pixelated;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        .tool-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .hud-panel {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border: 2px solid var(--ui-border);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 140px;
+            pointer-events: auto;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            gap: 10px;
+        }
+
+        .bar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .bar-container {
+            width: 100px; 
+            height: 8px;
+            background: #555;
+            border: 1px solid #333;
+            position: relative;
+            transition: width 0.5s ease; 
+        }
+
+        .bar-fill {
+            height: 100%;
+            transition: width 0.2s;
+        }
+
+        #energy-fill { background-color: var(--energy-col); width: 100%; }
+        #xp-fill { background-color: var(--xp-col); width: 0%; }
+
+        #buff-row {
+            display: none;
+            font-size: 8px;
+            color: var(--debuff-col);
+            margin-top: 5px;
+            text-align: center;
+            border-top: 1px dashed #ccc;
+            padding-top: 5px;
+        }
+
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 5px;
+            border-top: 1px dashed #ccc;
+            padding-top: 5px;
+        }
+
+        .audio-btn {
+            background: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            opacity: 0.5;
+            font-family: 'Press Start 2P';
+        }
+        .audio-btn.on {
+            background: #a5d6a7;
+            border-color: #2e7d32;
+            opacity: 1;
+        }
+
+        #toolbar {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px;
+            border-radius: 8px;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .tool {
+            width: 40px;
+            height: 40px;
+            background: var(--ui-bg);
+            border: 2px solid #5d4037;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: opacity 0.2s;
+        }
+
+        .tool.active {
+            background: #fff;
+            border-color: #ffeb3b;
+            transform: translateY(-4px);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+        }
+
+        .tool.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(100%);
+        }
+
+        .key-hint {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 6px;
+            color: #555;
+        }
+
+        .seed-icon {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 8px;
+        }
+
+        .popup-menu {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--ui-bg);
+            border: 4px solid var(--ui-border);
+            padding: 15px;
+            text-align: center;
+            display: none;
+            z-index: 30;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .market-section {
+            background: rgba(255,255,255,0.5);
+            border: 1px solid #8b4513;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .market-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .sell-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            padding: 5px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .inv-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            padding: 8px;
+            background: rgba(255,255,255,0.6);
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+
+        button {
+            font-family: 'Press Start 2P', cursive;
+            background: #8bc34a;
+            border: 2px solid #33691e;
+            color: white;
+            padding: 8px;
+            font-size: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover { background: #7cb342; }
+        button:disabled { background: #555; border-color: #333; cursor: not-allowed; }
+        
+        .sell-btn {
+            width: auto;
+            padding: 4px 8px;
+            background: #ffa726;
+            border-color: #e65100;
+        }
+        .sell-btn:hover { background: #fb8c00; }
+
+        #time-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            background: rgba(0, 0, 50, 0);
+            transition: background 1s linear;
+            z-index: 5;
+        }
+        
+        #levelup-overlay {
+            position: absolute;
+            top: 30%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-shadow: 0 0 10px #ffeb3b;
+            font-size: 20px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s, top 0.5s;
+            z-index: 40;
+            text-align: center;
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #fff;
+        }
+
+        #stoic-overlay {
+            position: absolute;
+            top: 20%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+            z-index: 45;
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+            background: rgba(0,0,0,0.6);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        #gulp-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff4081;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #fff;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 50;
+            transition: opacity 0.2s;
+        }
+
+        #sleep-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            background: black;
+            opacity: 0;
+            transition: opacity 1s ease;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        #bike-status {
+            position: absolute;
+            bottom: 60px;
+            right: 10px;
+            font-size: 8px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 5px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        #slap-msg {
+            position: absolute;
+            top: 40%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #d32f2f;
+            color: white;
+            padding: 20px;
+            border: 4px solid #fff;
+            font-size: 14px;
+            z-index: 60;
+            display: none;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            line-height: 1.5;
+        }
+
+        /* Ending Letter */
+        #ending-letter {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fffaf0;
+            border: 4px solid #8b4513;
+            padding: 30px;
+            width: 80%;
+            max-width: 600px;
+            z-index: 200;
+            display: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            color: #333;
+            font-size: 14px;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+    </style>
+</head>
+<body>
+<!-- Menu Bar - Include this in all subpages -->
+<style>
+  .menu-bar-container {
+    position: fixed;
+    top: 6px;
+    right: 6px;
+    z-index: 10000;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive;
+    color: #4a0072; /* dark purple */
+  }
+
+  .menu-button {
+    background-color: #fff;
+    border: 2px solid #4a0072;
+    box-shadow: 4px 4px 0px 0px rgba(74, 0, 114, 0.15);
+    padding: 8px 16px;
+    font-weight: bold;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 0;
+    color: #4a0072;
+  }
+
+  .menu-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 4px 6px 0px 0px rgba(74, 0, 114, 0.18);
+  }
+
+  .menu-button:active {
+    background-color: #f7e6fb;
+    transform: translateY(1px);
+    box-shadow: 2px 2px 0px 0px rgba(74, 0, 114, 0.12);
+  }
+
+  .menu-dropdown {
+    position: absolute;
+    top: 56px;
+    right: 0;
+    width: 280px;
+    background-color: #fff4fb;
+    border: 3px double #f0e6ff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    padding: 12px;
+    max-height: 72vh;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .menu-dropdown.open {
+    display: block;
+  }
+
+  .menu-title {
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 2px dashed #e6d0f0;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    color: #4a0072;
+  }
+
+  .menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .menu-item {
+    display: block;
+  }
+
+  .menu-link {
+    display: block;
+    padding: 6px 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    color: #4a0072;
+    transition: all 0.12s;
+    font-family: 'Comic Sans MS', 'Comic Neue', cursive;
+  }
+
+  .menu-link:hover {
+    background-color: #fff;
+    border: 1px solid #f0c6eb;
+  }
+
+  .menu-emoji {
+    display: inline-block;
+    margin-right: 8px;
+  }
+
+  .menu-title-text {
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-decoration-color: #4a0072;
+  }
+
+  /* Scrollbar styling */
+  .menu-dropdown::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .menu-dropdown::-webkit-scrollbar-track {
+    background: #fff4fb;
+  }
+
+  .menu-dropdown::-webkit-scrollbar-thumb {
+    background: #d8a3e0;
+    border-radius: 4px;
+  }
+
+  .menu-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #c985d6;
+  }
+</style>
+
+<div class="menu-bar-container">
+  <button class="menu-button" id="menuToggle">MENU ☰</button>
+  <div class="menu-dropdown" id="menuDropdown">
+    <div class="menu-title">i made these!!!</div>
+    <ul class="menu-list" id="menuList"></ul>
+  </div>
+</div>
+
+<script>
+  // Menu data — ensure URLs match current filenames in repo
+  const projects = [
+        { title: 'Tiny Harvest - Farming Sim', url: '/tinyharvest.html', emoji: '🌱' },
+      { title: "Alien Sudoku", url: "/aliensudoku.html", emoji: "👽" },
+      { title: "Hayırlı Olsun Reaffirmer", url: "/hayirliolsun.html", emoji: "🧿" },
+      { title: "I'm Baby", url: "/imbaby.html", emoji: "🍼" },
+      { title: "Shower Thoughts", url: "/showerthoughts.html", emoji: "🛁" },
+      { title: "Which SP9K Girl Are You?", url: "/sp9k.html", emoji: "👧" },
+    { title: 'Husband Finder', url: '/husband-finder.html', emoji: '💍' },
+    { title: 'Hangi Manifest Kızısın?', url: '/hangimanifest.html', emoji: '🔮' },
+    { title: 'Particularly', url: '/particularly.html', emoji: '✨' },
+    { title: 'Page in a Page', url: '/page-in-page.html', emoji: '🕸️' },
+    { title: 'Which 2003 Lyric Are U?', url: '/2003lyrics.html', emoji: '🎤' },
+    { title: '✨Anket Defteri✨', url: '/anketdefteri.html', emoji: '📔' },
+    { title: 'Betrayal Calculator', url: '/oneofyou.html', emoji: '🐍' },
+    { title: 'What Color is the Flag?', url: '/redflag.html', emoji: '🚩' },
+    { title: 'ÇBS Simulator', url: '/thecrunch.html', emoji: '📈' },
+    { title: 'Anti-Productivity App', url: '/thevoid.html', emoji: '🕳️' },
+    { title: 'ÇBS Paint', url: '/mspaint.html', emoji: '🎨' },
+    { title: 'Catch the Frog', url: '/thefrog.html', emoji: '🐸' },
+    { title: 'Follow the White Rabbit', url: '/rabbit.html', emoji: '🐇' },
+    { title: 'The Prophecy', url: '/theorb.html', emoji: '🔮' },
+    { title: 'Scream into the Void', url: '/scream.html', emoji: '😱' },
+    { title: 'Ice Ice Baby', url: '/icecube.html', emoji: '🧊' },
+    { title: 'Excuse Generator', url: '/excusegen.html', emoji: '🤥' },
+    { title: 'The Sorting Ceremony', url: '/hogwarts.html', emoji: '🎩' },
+    { title: 'Past Life Registry', url: '/pastliferegistry.html', emoji: '📜' },
+    { title: 'Startup Generator', url: '/startupgen.html', emoji: '🚀' },
+    { title: 'Is It Tuesday?', url: '/tuesday.html', emoji: '📅' },
+
+  ];
+
+  const menuToggle = document.getElementById('menuToggle');
+  const menuDropdown = document.getElementById('menuDropdown');
+  const menuList = document.getElementById('menuList');
+
+  // Populate menu
+  projects.forEach(project => {
+    const li = document.createElement('li');
+    li.className = 'menu-item';
+    li.innerHTML = `
+      <a href="${project.url}" class="menu-link">
+        <span class="menu-emoji">${project.emoji}</span>
+        <span class="menu-title-text">${project.title}</span>
+      </a>
+    `;
+    menuList.appendChild(li);
+  });
+
+  // Toggle menu
+  menuToggle.addEventListener('click', () => {
+    menuDropdown.classList.toggle('open');
+    menuToggle.textContent = menuDropdown.classList.contains('open') ? 'CLOSE [X]' : 'MENU ☰';
+  });
+
+  // Close menu when clicking a link
+  document.querySelectorAll('.menu-link').forEach(link => {
+    link.addEventListener('click', () => {
+      menuDropdown.classList.remove('open');
+      menuToggle.textContent = 'MENU ☰';
+    });
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.menu-bar-container')) {
+      menuDropdown.classList.remove('open');
+      menuToggle.textContent = 'MENU ☰';
+    }
+  });
+</script>
+
+
+        <!-- Go Back Button - Include in all subpages -->
+        <style>
+        .go-back-container {
+            position: fixed;
+            top: 6px;
+            left: 6px;
+            z-index: 10001;
+            font-family: 'Comic Sans MS', 'Comic Neue', cursive;
+        }
+        .go-back-button {
+            background-color: #fff;
+            border: 2px solid #4a0072;
+            box-shadow: 4px 4px 0px 0px rgba(74, 0, 114, 0.15);
+            padding: 8px 16px;
+            font-weight: bold;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-radius: 0;
+            color: #4a0072;
+        }
+        .go-back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 4px 6px 0px 0px rgba(74, 0, 114, 0.18);
+        }
+        .go-back-button:active {
+            background-color: #f7e6fb;
+            transform: translateY(1px);
+            box-shadow: 2px 2px 0px 0px rgba(74, 0, 114, 0.12);
+        }
+        </style>
+        <div class="go-back-container">
+            <button class="go-back-button" onclick="window.location.href='/'">Go Back</button>
+        </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <div class="start-box">
+            <h1 style="font-size:24px; margin-bottom:20px; color:#8b4513;">Tiny Harvest</h1>
+            <p>What is your name, farmer?</p>
+            <input type="text" id="player-name-input" maxlength="12" placeholder="Your Name">
+            <br>
+            <button onclick="startGameSession()" style="width:auto; padding:15px 30px;">BEGIN</button>
+        </div>
+    </div>
+
+    <!-- Ending Letter -->
+    <div id="ending-letter">
+        <p>oh my god. i can't believe someone actually played this up until level 17. if anyone actually sees this, let me know. it might seriously change my career trajectory. i have always wanted one of these three things: a) becoming a published novelist, b) creating my own kid's animation series, and c) creating my own game, like stardew valley. the one i was the farthest away from has always been c. but now my redbull-fueled 3am extravaganza turned into this random game and someone actually played it so much that they're at level 17! you know there is no option to save right? that required coding knowledge i didn't have. seriously though, let me know if you're reading this, and i'll learn firebase for you. <3</p>
+        <br>
+        <button onclick="closeLetter()">continue i guess?</button>
+    </div>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="640" height="480"></canvas>
+        
+        <div id="time-overlay"></div>
+        <div id="sleep-overlay">SLEEPING...</div>
+        <div id="levelup-overlay">LEVEL UP!<br><span style="font-size:10px" id="levelup-msg">Energy usage reduced!</span></div>
+        <div id="stoic-overlay"></div>
+        <div id="gulp-text">GULP!</div>
+        <div id="slap-msg">You slapped the weirdo to oblivion!</div>
+        <div id="bike-status">BIKE: ON</div>
+
+        <div id="ui-layer">
+            <div class="hud-panel">
+                <div class="stat-row">
+                    <span>
+                        <svg class="pixel-icon" viewBox="0 0 16 16"><rect x="4" y="2" width="8" height="12" fill="#ffd700"/><rect x="6" y="4" width="4" height="8" fill="#fff700"/><path d="M6 6h4v1H6zM6 9h4v1H6z" fill="#b8860b"/></svg> 
+                        <span id="money">50</span>
+                    </span>
+                    <span>Day <span id="day">1</span></span>
+                </div>
+                <div class="stat-row" style="justify-content: center;">
+                    <span id="player-name-display">Farmer</span>
+                </div>
+                <div class="stat-row" style="justify-content: center;">
+                    <span>Lvl <span id="level">1</span></span>
+                </div>
+                
+                <div class="bar-group">
+                    <div style="font-size: 8px;">ENERGY</div>
+                    <div id="energy-bar-wrapper" class="bar-container">
+                        <div id="energy-fill" class="bar-fill"></div>
+                    </div>
+                </div>
+                
+                <div class="bar-group">
+                    <div style="font-size: 8px;">XP</div>
+                    <div id="xp-bar-wrapper" class="bar-container">
+                        <div id="xp-fill" class="bar-fill"></div>
+                    </div>
+                </div>
+
+                <div id="buff-row">ALCOHOLIC (24h)</div>
+
+                <div class="audio-controls">
+                    <button id="btn-music" class="audio-btn on" onclick="toggleMusic(event)">MUS</button>
+                    <button id="btn-sfx" class="audio-btn on" onclick="toggleSfx(event)">SFX</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="toolbar">
+            <!-- Hoe -->
+            <div class="tool active" onclick="selectTool(0)" data-id="0">
+                <span class="key-hint">1</span>
+                <svg class="pixel-icon tool-icon" viewBox="0 0 16 16"><path d="M4 2h8v2h-2v10H8V4H4V2z" fill="#8b4513"/><path d="M4 2h8v2H4z" fill="#cd853f"/></svg>
+            </div>
+            <!-- Water -->
+            <div class="tool" onclick="selectTool(1)" data-id="1">
+                <span class="key-hint">2</span>
+                <svg class="pixel-icon tool-icon" viewBox="0 0 16 16"><path d="M8 2C5 6 3 9 3 11a5 5 0 0010 0c0-2-2-5-5-9z" fill="#4fc3f7"/></svg>
+            </div>
+            <!-- Seeds -->
+            <div class="tool" onclick="selectTool(2)" data-id="2">
+                <span class="key-hint">3</span>
+                <svg class="pixel-icon tool-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4" fill="#aed581"/><circle cx="6" cy="6" r="1" fill="#33691e"/></svg>
+                <span id="seed-count" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border-radius:50%; padding:2px; font-size:6px;">5</span>
+            </div>
+            <!-- Basket -->
+            <div class="tool" onclick="selectTool(3)" data-id="3">
+                <span class="key-hint">4</span>
+                <svg class="pixel-icon tool-icon" viewBox="0 0 16 16"><path d="M2 6h12v8H2z" fill="#d7ccc8"/><path d="M4 2h8v4H4z" fill="none" stroke="#8d6e63" stroke-width="2"/></svg>
+            </div>
+            <!-- Friend Whistle -->
+            <div class="tool" onclick="selectTool(4)" data-id="4">
+                <span class="key-hint">5</span>
+                <!-- Phone Icon -->
+                <svg class="pixel-icon tool-icon" viewBox="0 0 16 16">
+                    <path d="M5 2h6v12H5z" fill="#333"/>
+                    <path d="M6 3h4v9H6z" fill="#81d4fa"/>
+                    <rect x="7" y="13" width="2" height="1" fill="#555"/>
+                </svg>
+            </div>
+            <!-- Wine Glass -->
+            <div class="tool" onclick="selectTool(5)" data-id="5">
+                <span class="key-hint">6</span>
+                <svg class="pixel-icon tool-icon" viewBox="0 0 16 16">
+                    <path d="M3 3h10v1l-1 5c0 1.5-1 2.5-2 3v2h3v2H3v-2h3v-2c-1-.5-2-1.5-2-3l-1-5V3z" fill="#d00000"/>
+                    <path d="M3 3h10M4 4h8v3c0 1-.5 2-1 2.5V12h-4V9.5C6.5 9 6 8 6 7V4z" fill="none" stroke="#800000" stroke-width="1"/>
+                </svg>
+            </div>
+            <!-- Slap (Hidden until lvl 5) -->
+            <div class="tool" id="tool-slap" onclick="selectTool(6)" data-id="6" style="display:none">
+                <span class="key-hint">7</span>
+                <!-- Better Hand Icon -->
+                <svg class="pixel-icon tool-icon" viewBox="0 0 16 16">
+                    <path d="M6 2v7h2v-6h2v6h2v-5h2v9h-10v-4h2v-7z" fill="#ffcc80"/>
+                    <path d="M4 10h2v4h8v-2h2v3h-12z" fill="#ffcc80"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Market Menu -->
+        <div id="market-menu" class="popup-menu">
+            <h3>MARKET</h3>
+            <div class="market-section">
+                <h4 style="font-size:12px; margin-bottom:10px; color:#e65100;">SELL CROPS</h4>
+                <div id="sell-list"></div>
+            </div>
+            <div class="market-section">
+                <h4 style="font-size:12px; margin-bottom:10px; color:#33691e;">BUY SEEDS & GEAR</h4>
+                <div class="market-grid">
+                    <button onclick="buySeed('cauliflower', 10)">Cauli Seed (10g)</button>
+                    <button onclick="buySeed('pumpkin', 15)">Pumpk Seed (15g)</button>
+                    <button onclick="buySeed('zucchini', 12)">Zucch Seed (12g)</button>
+                    <button id="btn-bike" onclick="buyBike()">Bike (200g)</button>
+                    <button id="btn-energy" onclick="buyEnergyDrink(1)">Energy Drink (400g)</button>
+                    <button id="btn-energy-xl" onclick="buyEnergyDrink(2)" style="display:none">Energy XL (1200g)</button>
+                    <button id="btn-energy-monster" onclick="buyEnergyDrink(3)" style="display:none">Monster Energy (3000g)</button>
+                    <button id="btn-coop" onclick="buyCoop()">Coop (500g)</button>
+                    <button id="btn-chicken" onclick="buyChicken()">Chicken (350g)</button>
+                    <button id="btn-finalslap" onclick="buyFinalSlap()" style="display:none; grid-column: span 2; background: #d32f2f;">The Final Slap (10000g)</button>
+                </div>
+            </div>
+            <button style="background:#d32f2f; margin-top:5px;" onclick="toggleMarket()">CLOSE</button>
+        </div>
+
+        <!-- Inventory Menu -->
+        <div id="inventory-menu" class="popup-menu">
+            <h3>INVENTORY</h3>
+            <div class="market-section">
+                <h4 style="font-size:12px; margin-bottom:10px; color:#33691e;">SEEDS</h4>
+                <div id="inv-seeds"></div>
+            </div>
+            <div class="market-section">
+                <h4 style="font-size:12px; margin-bottom:10px; color:#e65100;">HARVEST</h4>
+                <div id="inv-harvest"></div>
+            </div>
+            <div class="market-section">
+                <h4 style="font-size:12px; margin-bottom:10px; color:#5d4037;">GEAR</h4>
+                <div id="inv-gear"></div>
+            </div>
+            <button style="background:#d32f2f; margin-top:5px;" onclick="toggleInventory()">CLOSE</button>
+        </div>
+    </div>
+
+    <div style="margin-top:10px; color:#fff; font-size:10px; text-align:center; text-shadow: 1px 1px 2px #000;">
+        [WASD] Move • [SPACE] Act • [M] Market • [I] Inventory<br>
+        [B] Bike • [3] Cycle Seeds • [5] Friend • [6] Wine • [7] Slap
+    </div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const energyFill = document.getElementById('energy-fill');
+    const energyContainer = document.getElementById('energy-bar-wrapper');
+    const xpFill = document.getElementById('xp-fill');
+    const xpContainer = document.getElementById('xp-bar-wrapper');
+    const sleepOverlay = document.getElementById('sleep-overlay');
+    const bikeStatus = document.getElementById('bike-status');
+    const levelOverlay = document.getElementById('levelup-overlay');
+    const levelMsg = document.getElementById('levelup-msg');
+    const stoicOverlay = document.getElementById('stoic-overlay');
+    const gulpText = document.getElementById('gulp-text');
+    const buffRow = document.getElementById('buff-row');
+    const slapMsg = document.getElementById('slap-msg');
+    const endingLetter = document.getElementById('ending-letter');
+    
+    const TILE_SIZE = 32;
+    const COLS = 20; 
+    const ROWS = 15; 
+    
+    const C_GRASS = '#66bb6a';
+    const C_SOIL = '#795548';
+    const C_WET_SOIL = '#4e342e';
+
+    const CROPS = {
+        cauliflower: { name: 'Cauliflower', color: '#ffffff', harvestColor: '#eee', price: 15, growTime: 30 },
+        pumpkin: { name: 'Pumpkin', color: '#ff9800', harvestColor: '#f57c00', price: 25, growTime: 50 },
+        zucchini: { name: 'Zucchini', color: '#4caf50', harvestColor: '#2e7d32', price: 20, growTime: 40 },
+        egg: { name: 'Egg', color: '#fff', harvestColor: '#fff', price: 35, growTime: 0 }
+    };
+
+    const STOIC_QUOTES = [
+        "The obstacle is the way.",
+        "We suffer more often in imagination than in reality.",
+        "Waste no more time arguing what a good man should be. Be one.",
+        "You have power over your mind - not outside events.",
+        "The best revenge is not to be like your enemy.",
+        "It is not death that a man should fear, but he should fear never beginning to live.",
+        "Happiness resides not in possessions, and not in gold, happiness dwells in the soul.",
+        "Man conquers the world by conquering himself.",
+        "No man is free who is not master of himself.",
+        "Difficulties strengthen the mind, as labor does the body."
+    ];
+    
+    const NEIGHBOR_TALK = [
+        "Did you know the most dangerous animal in the world is actually mosquitoes?",
+        "I recently had my plumbing done and boy could I have done it myself.",
+        "I have come to appreciate your friendship.",
+        "Have you ever really looked at a turnip?",
+        "Sometimes I just stand here and vibrate.",
+        "The Wi-Fi out here is terrible.",
+        "I saw a UFO last Tuesday. Or it was a frisbee.",
+        "Why do chickens cross the road? No, really, why?",
+        "I'm thinking of starting a podcast about soil.",
+        "Do you think the trees judge us?",
+        "My cat has more political opinions than I do.",
+        "Is it going to rain? My knee hurts.",
+        "I love the smell of napalm... I mean, manure in the morning.",
+        "Farming is cheaper than therapy.",
+        "I tried to milk a cow once. It was a bull.",
+        "What if we are all just pixels?",
+        "I need to return some video tapes.",
+        "Life is like a box of chocolates. Expensive.",
+        "I'm allergic to hard work.",
+        "Nice hat. Did you steal it?",
+        "I used to be an adventurer like you.",
+        "Do you believe in ghosts?",
+        "I heard the city folk pay $10 for water.",
+        "I made a pie. I ate it all.",
+        "The birds work for the bourgeoisie.",
+        "Gravity is just a theory.",
+        "I'm writing a memoir called 'Dirt & Dreams'.",
+        "Can you lend me 50g? Just kidding.",
+        "I found a shiny rock today.",
+        "You're doing great, kid."
+    ];
+
+    // Images
+    const imgHouse = new Image();
+    imgHouse.crossOrigin = "Anonymous";
+    imgHouse.src = 'https://i.postimg.cc/C5kHpkb7/Untitled-design-(3).png';
+    
+    const imgPlayer = new Image();
+    imgPlayer.crossOrigin = "Anonymous";
+    imgPlayer.src = 'https://i.postimg.cc/MKBrzjWZ/1.png';
+    
+    const imgFriend = new Image();
+    imgFriend.crossOrigin = "Anonymous";
+    imgFriend.src = 'https://i.postimg.cc/xjJ6PbNy/2.png';
+    
+    const imgCoop = new Image();
+    imgCoop.crossOrigin = "Anonymous";
+    imgCoop.src = 'https://i.postimg.cc/VNKbMdLq/3.png';
+
+    // Offscreen canvas for processed sprites
+    let playerCanvas = document.createElement('canvas');
+    let playerCtx = playerCanvas.getContext('2d');
+    let playerReady = false;
+
+    imgPlayer.onload = function() {
+        playerCanvas.width = imgPlayer.width;
+        playerCanvas.height = imgPlayer.height;
+        playerCtx.drawImage(imgPlayer, 0, 0);
+        // Chroma Key: Remove White Background
+        const imageData = playerCtx.getImageData(0, 0, playerCanvas.width, playerCanvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            // If R, G, B > 240 (Near White)
+            if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240) {
+                data[i+3] = 0; // Set alpha to 0
+            }
+        }
+        playerCtx.putImageData(imageData, 0, 0);
+        playerReady = true;
+    };
+    
+    let friendCanvas = document.createElement('canvas');
+    let friendCtx = friendCanvas.getContext('2d');
+    let friendReady = false;
+    
+    imgFriend.onload = function() {
+        friendCanvas.width = imgFriend.width;
+        friendCanvas.height = imgFriend.height;
+        friendCtx.drawImage(imgFriend, 0, 0);
+        const imageData = friendCtx.getImageData(0, 0, friendCanvas.width, friendCanvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240) {
+                data[i+3] = 0;
+            }
+        }
+        friendCtx.putImageData(imageData, 0, 0);
+        friendReady = true;
+    }
+
+    let money = 50;
+    let day = 1;
+    let time = 0; 
+    let currentTool = 0; 
+    let isSleeping = false;
+    let playerName = "Farmer";
+    let keyBuffer = ""; // Cheat code buffer
+    
+    // Audio Settings
+    let isMusicOn = localStorage.getItem('isMusicOn') !== 'false'; 
+    let isSfxOn = localStorage.getItem('isSfxOn') !== 'false'; 
+    
+    const btnMusic = document.getElementById('btn-music');
+    const btnSfx = document.getElementById('btn-sfx');
+    
+    function updateAudioUI() {
+        btnMusic.className = isMusicOn ? 'audio-btn on' : 'audio-btn';
+        btnMusic.style.opacity = isMusicOn ? 1 : 0.5;
+        btnSfx.className = isSfxOn ? 'audio-btn on' : 'audio-btn';
+        btnSfx.style.opacity = isSfxOn ? 1 : 0.5;
+    }
+    updateAudioUI();
+
+    let seeds = { cauliflower: 5, pumpkin: 0, zucchini: 0 };
+    let crops = { cauliflower: 0, pumpkin: 0, zucchini: 0, egg: 0 };
+    let currentSeedType = 'cauliflower';
+    const seedTypes = ['cauliflower', 'pumpkin', 'zucchini'];
+
+    let map = [];
+    let particles = [];
+    let floatingTexts = [];
+
+    let player = {
+        x: 10 * TILE_SIZE,
+        y: 7 * TILE_SIZE,
+        w: 24,
+        h: 24,
+        speed: 4,
+        baseSpeed: 4,
+        bikeSpeed: 8,
+        facing: 'down',
+        energy: 100,
+        maxEnergy: 100,
+        xp: 0,
+        level: 1,
+        nextLevelXp: 50,
+        hasBike: false,
+        hasCoop: false,
+        chickens: 0,
+        isRiding: false,
+        dailyWine: 0,
+        isAlcoholic: false,
+        energyUpgradeLevel: 0,
+        hasFinalSlap: false
+    };
+
+    let chickens = [];
+
+    let friend = {
+        active: false,
+        x: 0, y: 0, w: 24, h: 24,
+        speed: 1,
+        moveTimer: 0,
+        dir: 0,
+        lastTalk: 0
+    };
+
+    let dog = {
+        x: 15 * TILE_SIZE,
+        y: 10 * TILE_SIZE,
+        w: 16, h: 12,
+        dir: 0, 
+        moveTimer: 0,
+        speed: 1,
+        lastHeart: 0
+    };
+
+    let stalker = {
+        active: false,
+        x: 0, y: 0, w: 24, h: 24,
+        speed: 0.5,
+        goneUntil: 0,
+        permGone: false
+    };
+
+    const keys = {};
+    let audioCtx;
+    let musicInterval;
+
+    function startGameSession() {
+        const input = document.getElementById('player-name-input');
+        if (input.value.trim() !== "") {
+            playerName = input.value.trim();
+        }
+        document.getElementById('player-name-display').innerText = playerName;
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('game-container').style.display = 'block';
+        
+        initAudio();
+        init();
+    }
+
+    function initAudio() {
+        if (audioCtx) return;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(isMusicOn) startMusic();
+    }
+
+    function toggleMusic(e) {
+        if(e) e.stopPropagation();
+        isMusicOn = !isMusicOn;
+        localStorage.setItem('isMusicOn', isMusicOn);
+        updateAudioUI();
+        if(isMusicOn && !musicInterval) startMusic();
+    }
+
+    function toggleSfx(e) {
+        if(e) e.stopPropagation();
+        isSfxOn = !isSfxOn;
+        localStorage.setItem('isSfxOn', isSfxOn);
+        updateAudioUI();
+    }
+
+    function playTone(freq, type, duration, vol=0.1) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playSfx(action) {
+        if (!audioCtx || !isSfxOn) return;
+        if (action === 'till') playTone(150, 'square', 0.1, 0.1);
+        if (action === 'water') playTone(400, 'sine', 0.3, 0.05);
+        if (action === 'plant') playTone(600, 'triangle', 0.1, 0.05);
+        if (action === 'friend') playTone(880, 'sine', 0.5, 0.1);
+        if (action === 'harvest') {
+            playTone(800, 'sine', 0.1, 0.1);
+            setTimeout(() => playTone(1200, 'sine', 0.2, 0.1), 100);
+        }
+        if (action === 'levelup') {
+            playTone(400, 'sine', 0.1, 0.2);
+            setTimeout(() => playTone(600, 'sine', 0.1, 0.2), 100);
+            setTimeout(() => playTone(800, 'sine', 0.4, 0.2), 200);
+        }
+        if (action === 'drink') {
+            playTone(300, 'sawtooth', 0.3, 0.1);
+        }
+        if (action === 'slap') {
+            playTone(150, 'sawtooth', 0.1, 0.3);
+        }
+        if (action === 'dog') {
+            playTone(600, 'sine', 0.1, 0.1);
+        }
+        if (action === 'talk') {
+            playTone(500, 'square', 0.05, 0.1);
+        }
+    }
+
+    function startMusic() {
+        if(musicInterval) clearInterval(musicInterval);
+        playMusicNote(); 
+        musicInterval = setInterval(playMusicNote, 2000);
+    }
+
+    function playMusicNote() {
+        if (audioCtx && audioCtx.state === 'running' && isMusicOn) {
+            const notes = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50]; 
+            const freq = notes[Math.floor(Math.random() * notes.length)];
+            playTone(freq, 'sine', 1.5, 0.02); 
+        }
+    }
+
+    function init() {
+        for (let r = 0; r < ROWS; r++) {
+            let row = [];
+            for (let c = 0; c < COLS; c++) {
+                let type = 'grass';
+                if (c < 6 && r < 6) type = 'house_floor';
+                if (c >= 1 && c <= 4 && r >= 11 && r <= 14) type = 'coop_floor';
+
+                let decor = null;
+                if (type === 'grass') {
+                    let rand = Math.sin(c * 12.9898 + r * 78.233) * 43758.5453;
+                    rand = rand - Math.floor(rand);
+                    if (rand > 0.85) {
+                        const colors = ['#ff4081', '#ff9800', '#e040fb'];
+                        decor = { color: colors[Math.floor(rand * 100) % 3], x: c*TILE_SIZE + (rand*10)%20 + 5, y: r*TILE_SIZE + (rand*20)%20 + 5 };
+                    }
+                }
+                row.push({ type: type, water: 0, plant: null, hasEgg: false, decor: decor });
+            }
+            map.push(row);
+        }
+        requestAnimationFrame(gameLoop);
+        setInterval(advanceTime, 1000); 
+        updateUI();
+    }
+
+    function gameLoop() {
+        update();
+        updateDog();
+        updateFriend();
+        updateChickens();
+        updateStalker();
+        checkCollisions();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function update() {
+        if (isSleeping) return;
+
+        let moveSpeed = player.isRiding ? player.bikeSpeed : player.baseSpeed;
+        
+        if (keys['w'] || keys['ArrowUp']) { player.y -= moveSpeed; player.facing = 'up'; }
+        if (keys['s'] || keys['ArrowDown']) { player.y += moveSpeed; player.facing = 'down'; }
+        if (keys['a'] || keys['ArrowLeft']) { player.x -= moveSpeed; player.facing = 'left'; }
+        if (keys['d'] || keys['ArrowRight']) { player.x += moveSpeed; player.facing = 'right'; }
+
+        if (player.x < 0) player.x = 0;
+        if (player.y < 0) player.y = 0;
+        if (player.x > canvas.width - player.w) player.x = canvas.width - player.w;
+        if (player.y > canvas.height - player.h) player.y = canvas.height - player.h;
+
+        // House Entry: Sleep Portal (Middle 33% of image)
+        if (player.x > 70 && player.x < 130 && player.y > 140 && player.y < 180 && player.facing === 'up') {
+            startSleep();
+        }
+    }
+
+    function checkCollisions() {
+        // Dog Collision
+        if (checkOverlap(player, dog)) {
+            if (Date.now() - dog.lastHeart > 1000) { 
+                dog.lastHeart = Date.now();
+                playSfx('dog');
+                for(let i=0; i<5; i++) {
+                    createParticle(Math.floor(dog.x/TILE_SIZE), Math.floor(dog.y/TILE_SIZE), '#ff69b4');
+                }
+            }
+        }
+
+        // Friend Collision
+        if (friend.active && checkOverlap(player, friend)) {
+            if (Date.now() - friend.lastTalk > 3000) {
+                friend.lastTalk = Date.now();
+                playSfx('talk');
+                const txt = NEIGHBOR_TALK[Math.floor(Math.random() * NEIGHBOR_TALK.length)];
+                floatingTexts.push({
+                    x: friend.x,
+                    y: friend.y - 20,
+                    text: txt,
+                    life: 2.0,
+                    vy: -1
+                });
+            }
+        }
+    }
+
+    function checkOverlap(a, b) {
+        return (
+            a.x < b.x + b.w &&
+            a.x + a.w > b.x &&
+            a.y < b.y + b.h &&
+            a.y + a.h > b.y
+        );
+    }
+
+    function updateDog() {
+        if (dog.moveTimer <= 0) {
+            dog.dir = Math.floor(Math.random() * 5); 
+            dog.moveTimer = Math.random() * 50 + 20;
+        } else {
+            dog.moveTimer--;
+            if (dog.dir === 1) dog.x -= dog.speed;
+            if (dog.dir === 2) dog.x += dog.speed;
+            if (dog.dir === 3) dog.y -= dog.speed;
+            if (dog.dir === 4) dog.y += dog.speed;
+            
+            if (dog.x < 0) dog.x = 0;
+            if (dog.y < 0) dog.y = 0;
+            if (dog.x > canvas.width - dog.w) dog.x = canvas.width - dog.w;
+            if (dog.y > canvas.height - dog.h) dog.y = canvas.height - dog.h;
+        }
+    }
+
+    function updateFriend() {
+        if (!friend.active || isSleeping) return;
+
+        if (friend.moveTimer <= 0) {
+            friend.dir = Math.floor(Math.random() * 5);
+            friend.moveTimer = Math.random() * 50 + 20;
+        } else {
+            friend.moveTimer--;
+            if (friend.dir === 1) friend.x -= friend.speed;
+            if (friend.dir === 2) friend.x += friend.speed;
+            if (friend.dir === 3) friend.y -= friend.speed;
+            if (friend.dir === 4) friend.y += friend.speed;
+            
+            if (friend.x < 0) friend.x = 0;
+            if (friend.y < 0) friend.y = 0;
+            if (friend.x > canvas.width - friend.w) friend.x = canvas.width - friend.w;
+            if (friend.y > canvas.height - friend.h) friend.y = canvas.height - friend.h;
+        }
+    }
+
+    function updateChickens() {
+        if(!player.hasCoop) return;
+        
+        chickens.forEach(c => {
+            if (c.moveTimer <= 0) {
+                c.dir = Math.floor(Math.random() * 5); 
+                c.moveTimer = Math.random() * 50 + 20;
+            } else {
+                c.moveTimer--;
+                if (c.dir === 1) c.x -= 0.5;
+                if (c.dir === 2) c.x += 0.5;
+                if (c.dir === 3) c.y -= 0.5;
+                if (c.dir === 4) c.y += 0.5;
+                
+                if (c.x < 0) c.x = 0;
+                if (c.y < 0) c.y = 0;
+                if (c.x > canvas.width - 16) c.x = canvas.width - 16;
+                if (c.y > canvas.height - 16) c.y = canvas.height - 16;
+            }
+        });
+    }
+
+    function updateStalker() {
+        if (player.level < 3 || stalker.permGone || Date.now() < stalker.goneUntil) {
+            stalker.active = false;
+            return;
+        }
+        
+        if (!stalker.active) {
+            // Spawn randomly
+            stalker.x = Math.random() * canvas.width;
+            stalker.y = Math.random() * canvas.height;
+            stalker.active = true;
+        }
+
+        const dx = player.x - stalker.x;
+        const dy = player.y - stalker.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        
+        if (dist > 0) {
+            stalker.x += (dx / dist) * stalker.speed;
+            stalker.y += (dy / dist) * stalker.speed;
+        }
+
+        if (dist < 40) {
+            player.energy = Math.max(0, player.energy - 0.1);
+            updateUI();
+        }
+    }
+
+    function spawnEggs() {
+        if (!player.hasCoop || player.chickens === 0) return;
+        for(let i=0; i<player.chickens; i++) {
+            for(let attempt=0; attempt<10; attempt++) {
+                let cx = Math.floor(Math.random() * COLS);
+                let cy = Math.floor(Math.random() * ROWS);
+                let tile = map[cy][cx];
+                if (tile.type !== 'house_floor' && tile.type !== 'coop_floor' && !tile.plant && !tile.hasEgg) {
+                    tile.hasEgg = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    function drinkWine() {
+        if (player.energy < 20) return;
+        
+        player.energy -= 20;
+        player.dailyWine++;
+        
+        if (player.dailyWine > 3 && !player.isAlcoholic) {
+            player.isAlcoholic = true;
+            updateUI();
+        }
+
+        playSfx('drink');
+        gainXp(25);
+        
+        gulpText.style.opacity = 1;
+        setTimeout(() => { gulpText.style.opacity = 0; }, 800);
+        
+        const quote = STOIC_QUOTES[Math.floor(Math.random() * STOIC_QUOTES.length)];
+        stoicOverlay.innerText = quote;
+        stoicOverlay.style.opacity = 1;
+        
+        setTimeout(() => {
+            stoicOverlay.style.opacity = 0;
+        }, 4000);
+        
+        updateUI();
+    }
+
+    function slapStalker() {
+        if (!stalker.active) return;
+        
+        const dx = player.x - stalker.x;
+        const dy = player.y - stalker.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist < 60) {
+            playSfx('slap');
+            
+            if (player.hasFinalSlap) {
+                stalker.permGone = true;
+                stalker.active = false;
+                slapMsg.style.display = 'block';
+                setTimeout(() => slapMsg.style.display = 'none', 10000);
+            } else {
+                stalker.goneUntil = Date.now() + 60000; 
+                stalker.active = false;
+                alert("Stalker slapped away for 60s!");
+            }
+        }
+    }
+
+    function gainXp(amount) {
+        player.xp += amount;
+        if (player.xp >= player.nextLevelXp) {
+            player.level++;
+            player.xp -= player.nextLevelXp;
+            player.nextLevelXp = Math.floor(player.nextLevelXp * 1.5);
+            
+            // XP Bar Growth (Max 3 times)
+            if (player.level === 5 || player.level === 10 || player.level === 15) {
+                // Handled in UI scaling
+            }
+
+            // Unlock Slap at Lvl 5
+            if (player.level === 5) {
+                document.getElementById('tool-slap').style.display = 'flex';
+                alert("Unlocked SLAP! Press 7 to slap the weirdo.");
+            }
+            // Unlock Final Slap Market at Lvl 10
+            if (player.level === 10) {
+                document.getElementById('btn-finalslap').style.display = 'block';
+            }
+            
+            // Level 17 Ending
+            if (player.level === 17) {
+                endingLetter.style.display = 'block';
+            }
+            
+            let bonus = Math.floor(Math.random() * 90) + 10; 
+            money += bonus;
+
+            playSfx('levelup');
+            levelMsg.innerHTML = `Bonus: +${bonus} coins!`;
+            levelOverlay.style.top = "40%";
+            levelOverlay.style.opacity = "1";
+            setTimeout(() => {
+                levelOverlay.style.opacity = "0";
+                levelOverlay.style.top = "30%";
+            }, 3000);
+        }
+        updateUI();
+    }
+    
+    function closeLetter() {
+        endingLetter.style.display = 'none';
+    }
+
+    function interact() {
+        if (isSleeping) return;
+
+        if (time > 80) {
+            if (currentTool !== 3 && currentTool !== 5) return; 
+        }
+
+        let tx = Math.floor((player.x + player.w/2) / TILE_SIZE);
+        let ty = Math.floor((player.y + player.h/2) / TILE_SIZE);
+
+        if (ty < 0 || ty >= ROWS || tx < 0 || tx >= COLS) return;
+
+        let tile = map[ty][tx];
+        
+        let baseCost = Math.max(1, 6 - Math.floor(player.level / 2));
+        if (player.isAlcoholic) baseCost *= 1.5; 
+        
+        // Special Tools Cost Check
+        if (currentTool === 5) { drinkWine(); return; }
+        if (currentTool === 6) { slapStalker(); return; }
+
+        if (player.energy < baseCost) return;
+
+        let didAction = false;
+
+        if (currentTool === 0) { // HOE
+            if (tile.type === 'grass') {
+                tile.type = 'soil';
+                createParticle(tx, ty, '#5d4037');
+                playSfx('till');
+                didAction = true;
+                gainXp(5);
+            } else if (tile.type === 'soil' && !tile.plant) {
+                tile.type = 'grass';
+                tile.water = 0;
+                createParticle(tx, ty, '#66bb6a');
+                playSfx('till');
+                didAction = true;
+            }
+        } 
+        else if (currentTool === 1) { // WATER
+            if (tile.type === 'soil') {
+                tile.water = 100;
+                createParticle(tx, ty, '#4fc3f7');
+                playSfx('water');
+                didAction = true;
+                gainXp(2);
+            }
+        } 
+        else if (currentTool === 2) { // SEED
+            if (tile.type === 'soil' && !tile.plant && seeds[currentSeedType] > 0) {
+                tile.plant = { 
+                    type: currentSeedType,
+                    age: 0, 
+                    maxAge: CROPS[currentSeedType].growTime, 
+                    harvestable: false 
+                };
+                seeds[currentSeedType]--;
+                createParticle(tx, ty, '#aed581');
+                playSfx('plant');
+                didAction = true;
+                gainXp(10);
+                updateUI(); 
+            }
+        } 
+        else if (currentTool === 3) { // BASKET
+            if (tile.plant && tile.plant.harvestable) {
+                crops[tile.plant.type]++;
+                tile.plant = null;
+                tile.type = 'soil'; 
+                tile.water = 0; 
+                createParticle(tx, ty, '#fff9c4');
+                playSfx('harvest');
+                didAction = true;
+                gainXp(15);
+                updateUI(); 
+            } 
+            else if (tile.hasEgg) {
+                crops.egg++;
+                tile.hasEgg = false;
+                createParticle(tx, ty, '#fff');
+                playSfx('harvest');
+                didAction = true;
+                gainXp(5);
+                updateUI();
+            }
+        }
+        else if (currentTool === 4) { // FRIEND
+            if (!friend.active) {
+                let friendCost = 20 * (player.isAlcoholic ? 1.5 : 1);
+                if (player.energy >= friendCost) {
+                    friend.active = true;
+                    friend.x = player.x + 30;
+                    friend.y = player.y;
+                    player.energy -= friendCost;
+                    playSfx('friend');
+                    gainXp(20);
+                    updateUI();
+                }
+            }
+        }
+
+        if (didAction) {
+            player.energy -= baseCost;
+            updateUI();
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Map
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                let x = c * TILE_SIZE;
+                let y = r * TILE_SIZE;
+                let tile = map[r][c];
+
+                if (tile.type === 'house_floor' || tile.type === 'coop_floor') {
+                    ctx.fillStyle = C_GRASS;
+                    ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                    continue;
+                }
+
+                if (tile.type === 'grass') {
+                    ctx.fillStyle = C_GRASS;
+                    ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                    
+                    if (tile.decor) {
+                        const d = tile.decor;
+                        ctx.fillStyle = '#388e3c'; 
+                        ctx.fillRect(d.x + 1, d.y + 3, 2, 3);
+                        ctx.fillStyle = d.color; 
+                        ctx.fillRect(d.x, d.y + 1, 1, 1);
+                        ctx.fillRect(d.x + 3, d.y + 1, 1, 1);
+                        ctx.fillRect(d.x + 1, d.y, 2, 2);
+                    }
+
+                } else if (tile.type === 'soil') {
+                    ctx.fillStyle = tile.water > 30 ? C_WET_SOIL : C_SOIL;
+                    ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+                    ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+                }
+
+                if (tile.plant) {
+                    let cropInfo = CROPS[tile.plant.type];
+                    if (tile.plant.harvestable) {
+                        ctx.fillStyle = cropInfo.harvestColor; 
+                        let rad = tile.plant.type === 'zucchini' ? 4 : 8;
+                        if (tile.plant.type === 'zucchini') {
+                            ctx.beginPath(); ctx.ellipse(x+16, y+16, 6, 12, Math.PI/4, 0, Math.PI*2); ctx.fill();
+                        } else {
+                            ctx.beginPath(); ctx.arc(x + 16, y + 20, rad, 0, Math.PI*2); ctx.fill();
+                        }
+                        ctx.fillStyle = '#4caf50'; 
+                        ctx.fillRect(x + 12, y + 5, 8, 8);
+                    } else {
+                        ctx.fillStyle = '#8bc34a';
+                        let size = 4;
+                        if (tile.plant.age > 10) size = 8;
+                        if (tile.plant.age > 20) size = 12;
+                        ctx.beginPath(); ctx.arc(x + 16, y + 16, size/2, 0, Math.PI*2); ctx.fill();
+                    }
+                }
+
+                if (tile.hasEgg) {
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.ellipse(x+16, y+20, 6, 8, 0, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#ddd';
+                    ctx.stroke();
+                }
+            }
+        }
+
+        if (imgHouse.complete) {
+            ctx.drawImage(imgHouse, 0, 0, 200, 200);
+        }
+
+        if (player.hasCoop && imgCoop.complete) {
+            ctx.drawImage(imgCoop, 1 * TILE_SIZE, 11 * TILE_SIZE, 4 * TILE_SIZE, 4 * TILE_SIZE);
+        }
+
+        if (player.hasCoop) {
+            chickens.forEach(c => {
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(c.x, c.y + 4, 12, 10);
+                ctx.fillStyle = 'red';
+                ctx.fillRect(c.x + 4, c.y, 4, 4);
+                ctx.fillStyle = 'orange';
+                ctx.fillRect(c.x - 2, c.y + 6, 4, 4);
+            });
+        }
+
+        // Dog SVG
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(dog.x + 2, dog.y + 4, 8, 6);
+        ctx.fillRect(dog.x + 1, dog.y + 1, 4, 4);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(dog.x + 3, dog.y + 2, 1, 1);
+        ctx.fillStyle = '#CD853F';
+        ctx.fillRect(dog.x + 2, dog.y + 10, 2, 2);
+        ctx.fillRect(dog.x + 8, dog.y + 10, 2, 2);
+
+        if (friend.active && friendReady) {
+            friendCtx.drawImage(imgFriend, 0, 0);
+            ctx.drawImage(friendCanvas, friend.x, friend.y, friend.w, friend.h);
+        }
+
+        // Stalker (Old Woman 8-bit)
+        if (stalker.active) {
+            // Grey bun
+            ctx.fillStyle = '#ccc';
+            ctx.fillRect(stalker.x + 6, stalker.y, 12, 8);
+            // Face
+            ctx.fillStyle = '#ffcc80';
+            ctx.fillRect(stalker.x + 6, stalker.y + 6, 12, 10);
+            // Dress
+            ctx.fillStyle = '#5d4037'; // Dark brown dress
+            ctx.fillRect(stalker.x + 4, stalker.y + 16, 16, 14);
+            // Cane
+            ctx.fillStyle = '#8d6e63';
+            ctx.fillRect(stalker.x + 20, stalker.y + 14, 2, 16);
+            ctx.fillRect(stalker.x + 18, stalker.y + 14, 4, 2); // Handle
+        }
+
+        if (playerReady) {
+            ctx.drawImage(playerCanvas, player.x, player.y, player.w, player.h);
+        } else {
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+        }
+
+        if (player.isRiding) {
+            ctx.fillStyle = '#607d8b';
+            ctx.fillRect(player.x - 6, player.y + 18, 36, 4);
+            ctx.fillStyle = '#000';
+            ctx.beginPath(); ctx.arc(player.x-2, player.y+22, 6, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(player.x+26, player.y+22, 6, 0, Math.PI*2); ctx.fill();
+        }
+
+        let tx = Math.floor((player.x + player.w/2) / TILE_SIZE) * TILE_SIZE;
+        let ty = Math.floor((player.y + player.h/2) / TILE_SIZE) * TILE_SIZE;
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(tx, ty, TILE_SIZE, TILE_SIZE);
+
+        drawParticles();
+        drawFloatingTexts();
+    }
+
+    function createParticle(c, r, color) {
+        for(let i=0; i<5; i++) {
+            particles.push({
+                x: c * TILE_SIZE + 16,
+                y: r * TILE_SIZE + 16,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                life: 1.0,
+                color: color
+            });
+        }
+    }
+    function drawParticles() {
+        for(let i=particles.length-1; i>=0; i--) {
+            let p = particles[i];
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life;
+            ctx.fillRect(p.x, p.y, 4, 4);
+            ctx.globalAlpha = 1.0;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.05;
+            if(p.life <= 0) particles.splice(i, 1);
+        }
+    }
+
+    function drawFloatingTexts() {
+        ctx.font = '10px "Press Start 2P"';
+        ctx.textAlign = "center";
+        for(let i=floatingTexts.length-1; i>=0; i--) {
+            let t = floatingTexts[i];
+            ctx.fillStyle = `rgba(255, 255, 255, ${t.life})`;
+            ctx.strokeStyle = `rgba(0, 0, 0, ${t.life})`;
+            ctx.lineWidth = 2;
+            
+            // Wrap text if needed, simple implementation for now
+            ctx.strokeText(t.text, t.x, t.y);
+            ctx.fillText(t.text, t.x, t.y);
+
+            t.y += t.vy * 0.5;
+            t.life -= 0.01;
+            if(t.life <= 0) floatingTexts.splice(i, 1);
+        }
+        ctx.textAlign = "left"; // Reset
+    }
+
+    function advanceTime() {
+        if (isSleeping) return;
+        time += 0.4; 
+        let opacity = 0;
+        if (time > 50) opacity = (time - 50) / 60; 
+        if (opacity > 0.8) opacity = 0.8;
+        
+        document.getElementById('time-overlay').style.backgroundColor = `rgba(0, 0, 50, ${opacity})`;
+
+        const tools = document.querySelectorAll('.tool');
+        if (time > 80) {
+            tools.forEach(t => {
+                let id = parseInt(t.getAttribute('data-id'));
+                if (id !== 3 && id !== 5 && id !== 6) t.classList.add('disabled');
+            });
+        } else {
+            tools.forEach(t => t.classList.remove('disabled'));
+        }
+
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                let tile = map[r][c];
+                if (tile.plant && !tile.plant.harvestable) {
+                    let rate = tile.water > 0 ? 2 : 0.2;
+                    tile.plant.age += rate;
+                    if (tile.plant.age >= tile.plant.maxAge) tile.plant.harvestable = true;
+                }
+                if (tile.water > 0) tile.water -= 0.5; 
+            }
+        }
+    }
+
+    function startSleep() {
+        if (isSleeping) return;
+        isSleeping = true;
+        sleepOverlay.style.opacity = 1;
+        player.isRiding = false; 
+        friend.active = false; 
+        updateBikeStatus();
+        
+        setTimeout(() => {
+            day++;
+            time = 0; 
+            player.energy = player.maxEnergy; 
+            
+            player.dailyWine = 0;
+            player.isAlcoholic = false;
+
+            player.y = 7 * TILE_SIZE; 
+            player.x = 5 * TILE_SIZE;
+            player.facing = 'down';
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (map[r][c].type === 'soil') map[r][c].water = Math.max(0, map[r][c].water - 50);
+                }
+            }
+            
+            spawnEggs();
+
+            updateUI();
+            setTimeout(() => {
+                sleepOverlay.style.opacity = 0;
+                isSleeping = false;
+                document.getElementById('time-overlay').style.backgroundColor = `rgba(0, 0, 50, 0)`;
+            }, 1000);
+        }, 2000);
+    }
+
+    function selectTool(id) {
+        if (id === 2 && currentTool === 2) {
+            let idx = seedTypes.indexOf(currentSeedType);
+            currentSeedType = seedTypes[(idx + 1) % seedTypes.length];
+        }
+        currentTool = id;
+        document.querySelectorAll('.tool').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.tool[data-id="${id}"]`).classList.add('active');
+        updateUI();
+    }
+
+    function toggleBike() {
+        if (!player.hasBike || isSleeping) return;
+        player.isRiding = !player.isRiding;
+        updateBikeStatus();
+    }
+
+    function updateBikeStatus() {
+        if (player.hasBike) {
+            bikeStatus.style.display = 'block';
+            bikeStatus.innerText = player.isRiding ? "BIKE: ON" : "BIKE: OFF";
+            bikeStatus.style.color = player.isRiding ? '#00ff00' : '#fff';
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('money').innerText = money;
+        document.getElementById('day').innerText = day;
+        document.getElementById('level').innerText = player.level;
+        
+        document.getElementById('seed-count').innerText = seeds[currentSeedType];
+
+        const pct = Math.max(0, (player.energy / player.maxEnergy) * 100);
+        energyFill.style.width = pct + "%";
+        energyFill.style.backgroundColor = pct < 20 ? '#f44336' : '#ffc107';
+
+        // Dynamic Bar Sizing
+        let baseWidth = 100;
+        let energyWidth = baseWidth + (player.energyUpgradeLevel * 33);
+        let xpBonus = 0;
+        if (player.level >= 5) xpBonus += 33;
+        if (player.level >= 10) xpBonus += 33;
+        if (player.level >= 15) xpBonus += 33;
+        let xpWidth = baseWidth + xpBonus;
+
+        energyContainer.style.width = energyWidth + "px";
+        xpContainer.style.width = xpWidth + "px";
+
+        const xpPct = Math.min(100, (player.xp / player.nextLevelXp) * 100);
+        xpFill.style.width = xpPct + "%";
+
+        if (player.isAlcoholic) {
+            buffRow.style.display = 'block';
+        } else {
+            buffRow.style.display = 'none';
+        }
+        
+        if (player.energyUpgradeLevel === 0) {
+            document.getElementById('btn-energy').style.display = 'inline-block';
+            document.getElementById('btn-energy').innerText = "Energy Drink (400g)";
+            document.getElementById('btn-energy-xl').style.display = 'none';
+            document.getElementById('btn-energy-monster').style.display = 'none';
+        } else if (player.energyUpgradeLevel === 1) {
+            document.getElementById('btn-energy').style.display = 'none';
+            document.getElementById('btn-energy-xl').style.display = 'inline-block';
+            document.getElementById('btn-energy-monster').style.display = 'none';
+        } else if (player.energyUpgradeLevel === 2) {
+            document.getElementById('btn-energy').style.display = 'none';
+            document.getElementById('btn-energy-xl').style.display = 'none';
+            document.getElementById('btn-energy-monster').style.display = 'inline-block';
+        } else {
+            document.getElementById('btn-energy').style.display = 'none';
+            document.getElementById('btn-energy-xl').style.display = 'none';
+            document.getElementById('btn-energy-monster').style.display = 'none';
+        }
+    }
+
+    function toggleMarket() {
+        let menu = document.getElementById('market-menu');
+        let inv = document.getElementById('inventory-menu');
+        if (inv) inv.style.display = 'none'; 
+        
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+        } else {
+            document.getElementById('btn-chicken').style.display = player.hasCoop ? 'inline-block' : 'none';
+            updateMarketInventory(); 
+            updateUI();
+            menu.style.display = 'block';
+        }
+    }
+
+    function toggleInventory() {
+        let menu = document.getElementById('inventory-menu');
+        let market = document.getElementById('market-menu');
+        if (market) market.style.display = 'none'; 
+
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+        } else {
+            updateFullInventory(); 
+            menu.style.display = 'block';
+        }
+    }
+
+    function updateMarketInventory() {
+        const list = document.getElementById('sell-list');
+        list.innerHTML = ''; 
+
+        for (let type in crops) {
+            const count = crops[type];
+            const row = document.createElement('div');
+            row.className = 'sell-row';
+            
+            const info = document.createElement('span');
+            info.innerText = `${CROPS[type].name} (x${count})`;
+            
+            const btn = document.createElement('button');
+            btn.className = 'sell-btn';
+            btn.innerText = `Sell 1 (+${CROPS[type].price}g)`;
+            btn.onclick = () => sellSingle(type);
+            if (count <= 0) btn.disabled = true;
+
+            row.appendChild(info);
+            row.appendChild(btn);
+            list.appendChild(row);
+        }
+    }
+
+    function updateFullInventory() {
+        const seedList = document.getElementById('inv-seeds');
+        seedList.innerHTML = '';
+        for (let type in seeds) {
+            const row = document.createElement('div');
+            row.className = 'inv-row';
+            row.innerText = `${CROPS[type].name} Seeds: x${seeds[type]}`;
+            seedList.appendChild(row);
+        }
+
+        const harvestList = document.getElementById('inv-harvest');
+        harvestList.innerHTML = '';
+        for (let type in crops) {
+            const row = document.createElement('div');
+            row.className = 'inv-row';
+            row.innerText = `${CROPS[type].name}: x${crops[type]}`;
+            harvestList.appendChild(row);
+        }
+
+        const gearList = document.getElementById('inv-gear');
+        gearList.innerHTML = '';
+        if (player.hasBike) {
+            const row = document.createElement('div');
+            row.className = 'inv-row';
+            row.innerText = "Bicycle (Press B)";
+            gearList.appendChild(row);
+        } 
+        if (player.hasCoop) {
+            const row = document.createElement('div');
+            row.className = 'inv-row';
+            row.innerText = `Chicken Coop (${player.chickens} chickens)`;
+            gearList.appendChild(row);
+        }
+        if (player.hasFinalSlap) {
+            const row = document.createElement('div');
+            row.className = 'inv-row';
+            row.innerText = "The Final Slap";
+            gearList.appendChild(row);
+        }
+        if (!player.hasBike && !player.hasCoop && !player.hasFinalSlap) {
+            gearList.innerText = "No gear yet.";
+            gearList.style.fontSize = "10px";
+            gearList.style.padding = "5px";
+        }
+    }
+
+    function sellSingle(type) {
+        if (crops[type] > 0) {
+            crops[type]--;
+            money += CROPS[type].price;
+            playSfx('harvest');
+            updateUI();
+            updateMarketInventory();
+        }
+    }
+
+    function buySeed(type, price) {
+        if (money >= price) {
+            money -= price;
+            seeds[type]++;
+            updateUI();
+        } else {
+            alert("Not enough money!");
+        }
+    }
+
+    function buyBike() {
+        if (player.hasBike) return;
+        if (money >= 200) {
+            money -= 200;
+            player.hasBike = true;
+            document.getElementById('btn-bike').innerText = "OWNED";
+            document.getElementById('btn-bike').disabled = true;
+            updateUI();
+            updateBikeStatus();
+            alert("Bike Purchased! Press 'B' to toggle.");
+        } else {
+            alert("Need 200g!");
+        }
+    }
+
+    function buyEnergyDrink(level) {
+        let cost = 0;
+        if (level === 1) cost = 400;
+        if (level === 2) cost = 1200;
+        if (level === 3) cost = 3000;
+
+        if (money >= cost) {
+            money -= cost;
+            player.energyUpgradeLevel = level;
+            player.maxEnergy = Math.floor(player.maxEnergy * 1.2);
+            player.energy = player.maxEnergy;
+            playSfx('levelup');
+            alert("MAX ENERGY INCREASED!");
+            updateUI();
+        } else {
+            alert(`Need ${cost}g!`);
+        }
+    }
+
+    function buyCoop() {
+        if (player.hasCoop) return;
+        if (money >= 500) {
+            money -= 500;
+            player.hasCoop = true;
+            player.chickens = 1;
+            chickens.push({ 
+                x: 2 * TILE_SIZE, y: 12 * TILE_SIZE, 
+                moveTimer: 0, dir: 0 
+            });
+            document.getElementById('btn-coop').innerText = "OWNED";
+            document.getElementById('btn-coop').disabled = true;
+            updateUI();
+            alert("Coop Purchased! +1 Chicken.");
+        } else {
+            alert("Need 500g!");
+        }
+    }
+
+    function buyChicken() {
+        if (!player.hasCoop) {
+            alert("Buy a Coop first!");
+            return;
+        }
+        if (money >= 350) {
+            money -= 350;
+            player.chickens++;
+            chickens.push({ 
+                x: 2 * TILE_SIZE, y: 12 * TILE_SIZE, 
+                moveTimer: 0, dir: 0 
+            });
+            updateUI();
+        } else {
+            alert("Need 350g!");
+        }
+    }
+
+    function buyFinalSlap() {
+        if (money >= 10000) {
+            money -= 10000;
+            player.hasFinalSlap = true;
+            document.getElementById('btn-finalslap').innerText = "OWNED";
+            document.getElementById('btn-finalslap').disabled = true;
+            updateUI();
+            alert("You obtained THE FINAL SLAP!");
+        } else {
+            alert("Need 10000g!");
+        }
+    }
+
+    window.addEventListener('click', () => {
+        if (!audioCtx) initAudio();
+    }, { once: true });
+
+    window.addEventListener('keydown', e => {
+        if (!audioCtx) initAudio();
+        
+        keyBuffer += e.key.toLowerCase();
+        if (keyBuffer.length > 10) {
+            keyBuffer = keyBuffer.substring(keyBuffer.length - 10);
+        }
+
+        if (keyBuffer.endsWith("xptest")) {
+            gainXp(player.nextLevelXp - player.xp);
+            keyBuffer = "";
+        } else if (keyBuffer.endsWith("coin")) {
+            money += 1000;
+            updateUI();
+            playSfx('levelup');
+            keyBuffer = "";
+        }
+
+        if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].indexOf(e.key) > -1) {
+            e.preventDefault();
+        }
+
+        keys[e.key] = true;
+        if (e.key === ' ') interact();
+        if (e.key === 'm') toggleMarket();
+        if (e.key === 'i') toggleInventory();
+        if (e.key === 'b' || e.key === 'B') toggleBike();
+        if (e.key === '1') selectTool(0);
+        if (e.key === '2') selectTool(1);
+        if (e.key === '3') selectTool(2);
+        if (e.key === '4') selectTool(3);
+        if (e.key === '5') selectTool(4);
+        if (e.key === '6') selectTool(5);
+        if (e.key === '7') selectTool(6);
+    });
+
+    window.addEventListener('keyup', e => {
+        keys[e.key] = false;
+    });
+
+</script>
+</body>
+</html>
