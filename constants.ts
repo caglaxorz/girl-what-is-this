@@ -4,10 +4,10 @@ import { Project, Song, ChaosLinkItem } from './types';
 export const PROJECTS: Project[] = [
   { id: '1', title: 'Husband Finder', url: '/husband-finder.html', emoji: '💍' },
   { id: '3', title: 'Particularly', url: '/particularly.html', emoji: '✨' },
-  { id: '4', title: 'Hangi Manifest Kızısın', url: '/hangi-manifest.html', emoji: '🔮' },
+  { id: '4', title: 'Hangi Manifest Kızısın', url: '/hangimanifest.html', emoji: '🔮' },
   { id: '5', title: 'Page in a Page', url: '/page-in-page.html', emoji: '🕸️' },
   { id: '6', title: 'Which 2003 Lyric Are U?', url: '/2003lyrics.html', emoji: '🎤' },
-  { id: '7', title: '✨Anket Defteri✨', url: '/anket-defteri.html', emoji: '📔' },
+  { id: '7', title: '✨Anket Defteri✨', url: '/anketdefteri.html', emoji: '📔' },
   { id: '8', title: 'Betrayal Calculator', url: '/oneofyou.html', emoji: '🐍' },
   { id: '9', title: 'What Color is the Flag?', url: '/redflag.html', emoji: '🚩' },
   { id: '10', title: 'ÇBS Simulator', url: '/thecrunch.html', emoji: '📈' },
@@ -56,8 +56,8 @@ export const CHAOS_LINKS: ChaosLinkItem[] = [
   { text: "pretty_lights", url: "/particularly.html" },
 
   // Manifest
-  { text: "manifest_test", url: "/hangi-manifest.html" },
-  { text: "who_are_u_really?", url: "/hangi-manifest.html" },
+  { text: "manifest_test", url: "/hangimanifest.html" },
+  { text: "who_are_u_really?", url: "/hangimanifest.html" },
 
   // Page in Page
   { text: "web_inception", url: "/page-in-page.html" },
@@ -69,9 +69,9 @@ export const CHAOS_LINKS: ChaosLinkItem[] = [
   { text: "2003_vibes", url: "/2003lyrics.html" },
 
   // Anket Defteri
-  { text: "slambook.html", url: "/anket-defteri.html" },
-  { text: "sign_my_guestbook", url: "/anket-defteri.html" },
-  { text: "secret_diary", url: "/anket-defteri.html" },
+  { text: "slambook.html", url: "/anketdefteri.html" },
+  { text: "sign_my_guestbook", url: "/anketdefteri.html" },
+  { text: "secret_diary", url: "/anketdefteri.html" },
 
   // Betrayal Calculator
   { text: "is_it_you?", url: "/oneofyou.html" },
