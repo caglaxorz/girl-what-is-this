@@ -7,6 +7,7 @@ import VisitorCounter from './components/VisitorCounter';
 import Marquee from './components/Marquee';
 import Hamburger from './components/Hamburger';
 import Poll from './components/Poll';
+import PatchNotes from './components/PatchNotes';
 
 const App: React.FC = () => {
   // Project list for easy navigation to standalone .html files
@@ -109,6 +110,7 @@ const App: React.FC = () => {
           </div>
         </div>
       </footer>
+      <PatchNotes />
     </div>
   );
 };
