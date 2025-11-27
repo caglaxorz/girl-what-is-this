@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 
 const patchNotes = `
+v1.0.3 notes
+- fixed the previous patch notes where i said "this is a reproductive use of my time" instead of "a productive use of my time"
+- this is anything but reproductive
+
 v1.0.2 notes
 what even was this week? got inspired on monday to learn coding. found out monday evening that i don't really need to do that, since ai has apparently taken over. stayed up until tuesday morning coding my heart out, pushed v0.1.0. literally pushed, like giving birth. then shit got serious. here's a laundry list of all that i've done:
 - turns out i added all the subpage codes INTO the index.html page, and gemini distorted them to make them less funny versions of themselves (like tuesday.html was supposed to show the opposite answer, not the actual one). so i extracted them and connected subpages as linked urls so that i can grow cagla.dev without it becoming this massive monster code.
